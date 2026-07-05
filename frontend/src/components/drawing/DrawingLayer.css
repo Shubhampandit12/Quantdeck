@@ -62,7 +62,7 @@
 /* Style popover ---------------------------------------------------------- */
 .qd-drawpopover {
   position: absolute;
-  z-index: 15;
+  z-index: 40;
   padding: 8px;
   display: flex;
   flex-direction: column;

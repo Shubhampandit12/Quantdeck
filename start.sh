@@ -48,6 +48,17 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
+# --- Pre-flight: refuse to start if a port is already taken -----------------
+for port_pair in "backend:$BACKEND_PORT" "frontend:$FRONTEND_PORT"; do
+  name="${port_pair%%:*}"
+  port="${port_pair##*:}"
+  if lsof -tiTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1; then
+    echo "[error] Port $port ($name) is already in use — QuantDeck may already be"
+    echo "        running. Free it first, e.g.:  lsof -tiTCP:$port | xargs kill"
+    exit 1
+  fi
+done
+
 # --- First-run setup: backend venv + deps -----------------------------------
 if [ ! -d "$BACKEND/.venv" ]; then
   echo "[setup] Creating Python virtualenv + installing backend dependencies…"
