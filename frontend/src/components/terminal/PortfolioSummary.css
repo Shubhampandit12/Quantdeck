@@ -1,0 +1,27 @@
+/* PortfolioSummary — compact stat grid. */
+.pfsummary {
+  border-bottom: 1px solid var(--border);
+}
+.pfsummary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+}
+.pfstat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
+  background: var(--bg-1);
+}
+.pfstat-lbl {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-2);
+}
+.pfstat-val {
+  font-size: 13px;
+  font-weight: 600;
+}

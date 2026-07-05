@@ -1,0 +1,63 @@
+/* ChartPanel — lightweight-charts candlestick with drawing overlays. */
+.chartpanel {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+  background: var(--bg-1);
+  overflow: hidden;
+}
+
+/* header row: symbol + last price + data-source badge */
+.chart-head {
+  position: absolute;
+  top: 8px;
+  left: 52px; /* clear the drawing toolbar */
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+.chart-head .sym {
+  font-size: 15px;
+  font-weight: 700;
+}
+.chart-head .last {
+  font-size: 14px;
+  font-weight: 600;
+}
+.chart-head .src {
+  font-size: 11px;
+  color: var(--text-2);
+}
+
+/* the chart mount + overlay share this stacking box */
+.chart-stage {
+  position: absolute;
+  inset: 0;
+}
+.chart-mount {
+  position: absolute;
+  inset: 0;
+}
+/* the DrawingLayer overlay sits above the chart canvas */
+.chart-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+}
+
+.chart-loading,
+.chart-error {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--text-2);
+  font-size: 13px;
+  z-index: 20;
+}
+.chart-error {
+  color: var(--down);
+}

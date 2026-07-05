@@ -1,0 +1,245 @@
+/* StrategyManager layout: fixed-width strategy list + flexible editor column. */
+.strat-mgr {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+}
+
+/* ---- Left rail: strategy list ---- */
+.strat-list {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.strat-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.strat-new {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+.strat-list-items {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px;
+}
+.strat-empty {
+  padding: 16px 8px;
+  font-size: 12px;
+  text-align: center;
+}
+.strat-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-0);
+  padding: 8px 10px;
+  text-align: left;
+  transition: background 0.12s ease;
+}
+.strat-item:hover {
+  background: var(--bg-2);
+}
+.strat-item.active {
+  background: var(--bg-3);
+  border-color: var(--border-strong);
+}
+.strat-item-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.strat-dot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.strat-dot.running {
+  background: var(--up);
+  box-shadow: 0 0 6px var(--up);
+}
+.strat-dot.idle {
+  background: var(--text-2);
+}
+
+/* ---- Main editor column ---- */
+.strat-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  padding: 12px;
+  gap: 10px;
+}
+.strat-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.strat-name {
+  flex: 1;
+  font-weight: 600;
+}
+.strat-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* Status badge variants */
+.strat-status {
+  text-transform: capitalize;
+}
+.strat-status.idle {
+  background: var(--bg-3);
+  color: var(--text-1);
+}
+.strat-status.running {
+  background: var(--up-bg);
+  color: var(--up);
+}
+.strat-status.error {
+  background: var(--down-bg);
+  color: var(--down);
+}
+
+/* Run parameters row */
+.strat-run-row {
+  display: flex;
+  gap: 10px;
+}
+.strat-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+.strat-field-sm {
+  flex: 0 0 120px;
+}
+.strat-field-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-2);
+}
+
+.strat-error {
+  background: var(--down-bg);
+  color: var(--down);
+  border: 1px solid var(--down);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+/* ---- Code editor: gutter + textarea ---- */
+.strat-editor {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 200px;
+  background: var(--bg-0);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.strat-gutter {
+  margin: 0;
+  padding: 10px 8px;
+  text-align: right;
+  color: var(--text-2);
+  background: var(--bg-1);
+  border-right: 1px solid var(--border);
+  font-size: 12.5px;
+  line-height: 1.5;
+  overflow: hidden;
+  user-select: none;
+  min-width: 40px;
+  white-space: pre;
+}
+.strat-code {
+  flex: 1;
+  margin: 0;
+  padding: 10px 12px;
+  background: transparent;
+  color: var(--text-0);
+  border: none;
+  outline: none;
+  resize: none;
+  font-size: 12.5px;
+  line-height: 1.5;
+  tab-size: 4;
+  white-space: pre;
+  overflow: auto;
+}
+.strat-code:focus {
+  outline: none;
+}
+
+.strat-note {
+  font-size: 11.5px;
+  line-height: 1.4;
+  border-left: 2px solid var(--accent);
+  padding-left: 8px;
+}
+
+/* ---- Logs pane ---- */
+.strat-logs {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  height: 180px;
+  min-height: 120px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.strat-logs .panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.strat-live {
+  color: var(--up);
+  font-weight: 700;
+  animation: strat-pulse 1.4s ease-in-out infinite;
+}
+@keyframes strat-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.strat-logs-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px 12px;
+  background: var(--bg-0);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.strat-logs-empty {
+  font-size: 12px;
+}
+.strat-log-line {
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text-1);
+}

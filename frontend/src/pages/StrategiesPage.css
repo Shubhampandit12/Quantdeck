@@ -1,0 +1,100 @@
+/* Full-page layout: fixed nav + header, scrollable manager body. */
+.strat-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-0);
+}
+
+/* ---- Shared top nav (also used verbatim style-wise by other pages) ---- */
+.qd-nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: var(--topbar-h);
+  padding: 0 16px;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--border);
+  flex: 0 0 auto;
+}
+.qd-logo {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.qd-logo-accent {
+  color: var(--accent);
+}
+.qd-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.qd-nav-link {
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--text-1);
+  font-size: 13px;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.qd-nav-link:hover {
+  background: var(--bg-2);
+  color: var(--text-0);
+}
+.qd-nav-link.active {
+  color: var(--text-0);
+  background: var(--bg-3);
+}
+.qd-nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.qd-portfolio-select {
+  width: auto;
+  min-width: 140px;
+}
+
+/* ---- Page header ---- */
+.strat-page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px 8px;
+  flex: 0 0 auto;
+}
+.strat-page-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+.strat-page-sub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  max-width: 640px;
+}
+.strat-page-sub strong {
+  color: var(--text-0);
+}
+.strat-page-bt {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* ---- Body ---- */
+.strat-page-body {
+  flex: 1;
+  min-height: 0;
+  padding: 8px 20px 20px;
+}
+.strat-page-nopf {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 100%;
+  color: var(--text-1);
+}

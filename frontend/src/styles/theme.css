@@ -1,0 +1,172 @@
+/* QuantDeck dark theme — TradingView-inspired palette + design tokens.
+   Every component uses these CSS variables so the look stays consistent. */
+:root {
+  --bg-0: #0b0e11;      /* app background */
+  --bg-1: #131722;      /* panels (TradingView chart bg) */
+  --bg-2: #1c2230;      /* raised surfaces */
+  --bg-3: #262d3d;      /* hover / inputs */
+  --border: #2a2e39;
+  --border-strong: #363a45;
+
+  --text-0: #d1d4dc;    /* primary text */
+  --text-1: #a3a6af;    /* secondary */
+  --text-2: #6a6e78;    /* muted */
+
+  --accent: #2962ff;    /* TradingView blue */
+  --accent-hover: #1e53e5;
+  --up: #26a69a;        /* teal green (long/gain) */
+  --up-bg: rgba(38, 166, 154, 0.12);
+  --down: #ef5350;      /* red (short/loss) */
+  --down-bg: rgba(239, 83, 80, 0.12);
+  --warn: #f7a600;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  --font-mono: "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --radius: 6px;
+  --radius-sm: 4px;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --topbar-h: 48px;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+body {
+  background: var(--bg-0);
+  color: var(--text-0);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg-3);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+.up {
+  color: var(--up);
+}
+.down {
+  color: var(--down);
+}
+.muted {
+  color: var(--text-2);
+}
+
+/* Reusable primitives ---------------------------------------------------- */
+.btn {
+  background: var(--bg-3);
+  color: var(--text-0);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: 13px;
+  transition: background 0.12s ease;
+}
+.btn:hover {
+  background: var(--border-strong);
+}
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+.btn-buy {
+  background: var(--up);
+  border-color: var(--up);
+  color: #04120f;
+}
+.btn-sell {
+  background: var(--down);
+  border-color: var(--down);
+  color: #1a0505;
+}
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+}
+.btn-ghost:hover {
+  background: var(--bg-2);
+}
+.input,
+select.input {
+  background: var(--bg-0);
+  color: var(--text-0);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  font-size: 13px;
+  width: 100%;
+}
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+.badge-demo {
+  background: var(--warn);
+  color: #1a1200;
+}
+.badge-rt {
+  background: var(--up-bg);
+  color: var(--up);
+}
+.badge-delayed {
+  background: rgba(247, 166, 0, 0.14);
+  color: var(--warn);
+}
+
+.card {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.panel-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-2);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}

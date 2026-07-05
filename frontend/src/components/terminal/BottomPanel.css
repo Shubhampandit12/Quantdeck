@@ -1,0 +1,120 @@
+/* BottomPanel — tabbed positions/orders/history/logs/AI. */
+.bottompanel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--bg-1);
+}
+
+.bp-tabs {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.bp-tabs button {
+  background: transparent;
+  border: none;
+  color: var(--text-1);
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+.bp-tabs button.active {
+  color: var(--text-0);
+  border-bottom-color: var(--accent);
+}
+.bp-tabs button:hover {
+  background: var(--bg-2);
+}
+.bp-tabs .bp-count {
+  color: var(--text-2);
+  font-weight: 400;
+  margin-left: 4px;
+}
+.bp-tabs-spacer {
+  flex: 1;
+}
+.bp-tabs .btn {
+  margin-right: 8px;
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
+.bp-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* tables */
+.bp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.bp-table th {
+  position: sticky;
+  top: 0;
+  background: var(--bg-1);
+  text-align: right;
+  padding: 6px 10px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-2);
+  border-bottom: 1px solid var(--border);
+  z-index: 2;
+}
+.bp-table th:first-child,
+.bp-table td:first-child {
+  text-align: left;
+}
+.bp-table td {
+  text-align: right;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-0);
+}
+.bp-table tr:hover td {
+  background: var(--bg-2);
+}
+.bp-row-btn {
+  padding: 2px 8px;
+  font-size: 11px;
+}
+
+.bp-empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-2);
+}
+
+.side-long,
+.side-buy {
+  color: var(--up);
+}
+.side-short,
+.side-sell {
+  color: var(--down);
+}
+
+/* logs */
+.bp-logs {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 8px 12px;
+  line-height: 1.5;
+}
+.bp-log-line {
+  color: var(--text-1);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.bp-log-ts {
+  color: var(--text-2);
+  margin-right: 8px;
+}

@@ -1,0 +1,87 @@
+/* Watchlist — left panel with tabs, search, and live-price rows. */
+.watchlist {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.wl-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+.wl-tabs button {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-1);
+  padding: 9px 0;
+  font-size: 12px;
+  font-weight: 600;
+  border-bottom: 2px solid transparent;
+}
+.wl-tabs button.active {
+  color: var(--text-0);
+  border-bottom-color: var(--accent);
+}
+.wl-tabs button:hover {
+  background: var(--bg-2);
+}
+
+.wl-search {
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.wl-header {
+  display: grid;
+  grid-template-columns: 1fr 78px 62px;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.wl-rows {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.wl-row {
+  display: grid;
+  grid-template-columns: 1fr 78px 62px;
+  gap: 6px;
+  align-items: center;
+  padding: 7px 10px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+}
+.wl-row:hover {
+  background: var(--bg-2);
+}
+.wl-row.active {
+  background: var(--bg-3);
+}
+.wl-sym {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.wl-price {
+  text-align: right;
+  font-size: 12px;
+}
+.wl-chg {
+  text-align: right;
+  font-size: 12px;
+}
+.wl-empty {
+  padding: 16px;
+  color: var(--text-2);
+  text-align: center;
+}

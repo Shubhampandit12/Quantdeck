@@ -1,0 +1,335 @@
+/* AISessionPanel styles — all colors from theme.css tokens. */
+
+.ai-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--bg-1);
+  color: var(--text-0);
+}
+
+/* Header ---------------------------------------------------------------- */
+.ai-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.ai-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ai-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-1);
+}
+
+.ai-status-chip {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+}
+.ai-status-loading {
+  color: var(--text-2);
+}
+.ai-status-on {
+  color: var(--up);
+  background: var(--up-bg);
+  border-color: transparent;
+}
+.ai-status-off {
+  color: var(--warn);
+  background: rgba(247, 166, 0, 0.14);
+  border-color: transparent;
+}
+/* Session status chips, per lifecycle state. */
+.ai-session-running {
+  color: var(--up);
+  background: var(--up-bg);
+  border-color: transparent;
+}
+.ai-session-paused {
+  color: var(--warn);
+  background: rgba(247, 166, 0, 0.14);
+  border-color: transparent;
+}
+.ai-session-stopped,
+.ai-session-idle {
+  color: var(--text-2);
+}
+.ai-session-error {
+  color: var(--down);
+  background: var(--down-bg);
+  border-color: transparent;
+}
+
+/* Kill switch — always loud and red. */
+.ai-kill-btn {
+  background: var(--down);
+  color: #fff;
+  border: 1px solid var(--down);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  transition: filter 0.12s ease;
+}
+.ai-kill-btn:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+.ai-kill-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Notes / errors -------------------------------------------------------- */
+.ai-disabled-note {
+  margin: 8px 12px 0;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--warn);
+  background: rgba(247, 166, 0, 0.1);
+  border: 1px solid rgba(247, 166, 0, 0.3);
+  border-radius: var(--radius-sm);
+}
+.ai-disabled-note code {
+  font-family: var(--font-mono);
+  color: var(--text-0);
+}
+.ai-error {
+  margin: 8px 12px 0;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--down);
+  background: var(--down-bg);
+  border: 1px solid var(--down);
+  border-radius: var(--radius-sm);
+}
+
+/* Body layout ----------------------------------------------------------- */
+.ai-body {
+  display: grid;
+  grid-template-columns: minmax(280px, 340px) 1fr;
+  gap: 12px;
+  padding: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Controls column ------------------------------------------------------- */
+.ai-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  min-height: 0;
+}
+.ai-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ai-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+.ai-sublabel {
+  font-size: 11px;
+  color: var(--text-1);
+}
+.ai-prompt {
+  resize: vertical;
+  min-height: 90px;
+  line-height: 1.4;
+}
+
+.ai-guardrails {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.ai-guardrail-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* Lifecycle action buttons. */
+.ai-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ai-actions .btn {
+  flex: 1;
+  min-width: 72px;
+}
+.ai-actions .btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.ai-start {
+  min-width: 96px;
+}
+.ai-stop:not(:disabled) {
+  border-color: var(--down);
+  color: var(--down);
+}
+.ai-stop:not(:disabled):hover {
+  background: var(--down-bg);
+}
+
+/* One-off chat box. */
+.ai-chat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.ai-chat-row {
+  display: flex;
+  gap: 8px;
+}
+.ai-chat-row .input {
+  flex: 1;
+}
+.ai-chat-row .btn {
+  white-space: nowrap;
+}
+
+/* Trace column ---------------------------------------------------------- */
+.ai-trace {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--bg-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.ai-trace-title {
+  border-bottom: 1px solid var(--border);
+}
+.ai-trace-scroll {
+  flex: 1;
+  min-height: 160px;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ai-trace-empty {
+  padding: 16px 8px;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* A single trace row, color-coded by kind via a left border. */
+.ai-trace-row {
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--border-strong);
+  background: var(--bg-1);
+}
+.ai-trace-thought {
+  border-left-color: var(--text-2);
+}
+.ai-trace-tool_call {
+  border-left-color: var(--accent);
+  background: rgba(41, 98, 255, 0.06);
+}
+.ai-trace-tool_result {
+  border-left-color: var(--up);
+  background: var(--up-bg);
+}
+.ai-trace-message {
+  border-left-color: var(--warn);
+}
+
+.ai-trace-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+.ai-trace-kind {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.ai-kind-thought {
+  color: var(--text-2);
+}
+.ai-kind-tool_call {
+  color: var(--accent);
+}
+.ai-kind-tool_result {
+  color: var(--up);
+}
+.ai-kind-message {
+  color: var(--warn);
+}
+.ai-trace-ts {
+  font-size: 10px;
+  color: var(--text-2);
+}
+
+.ai-trace-content {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-0);
+}
+.ai-trace-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.ai-trace-tool {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-0);
+}
+.ai-trace-code {
+  margin: 4px 0 0;
+  padding: 6px 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-1);
+  background: var(--bg-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  max-height: 180px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Narrow container fallback — stack the two columns. */
+@media (max-width: 760px) {
+  .ai-body {
+    grid-template-columns: 1fr;
+  }
+}

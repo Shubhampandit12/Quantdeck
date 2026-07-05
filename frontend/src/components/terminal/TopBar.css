@@ -1,0 +1,190 @@
+/* TopBar — full-width terminal header. */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: var(--topbar-h);
+  padding: 0 12px;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--border);
+  overflow: visible;
+  white-space: nowrap;
+}
+
+.topbar-logo {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  color: var(--text-0);
+  padding-right: 4px;
+}
+.topbar-logo span {
+  color: var(--accent);
+}
+
+.topbar-sep {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+}
+
+.topbar-spacer {
+  flex: 1;
+}
+
+/* symbol search */
+.topbar-search {
+  position: relative;
+  width: 200px;
+}
+.topbar-search .input {
+  padding: 5px 8px;
+}
+.topbar-results {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  max-height: 320px;
+  overflow-y: auto;
+  background: var(--bg-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.topbar-result {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+}
+.topbar-result:hover {
+  background: var(--bg-3);
+}
+.topbar-result .sym {
+  font-weight: 600;
+}
+.topbar-result .nm {
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+/* asset-class + timeframe pill groups */
+.pill-group {
+  display: inline-flex;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.pill-group button {
+  background: var(--bg-1);
+  border: none;
+  color: var(--text-1);
+  padding: 5px 9px;
+  font-size: 12px;
+  border-right: 1px solid var(--border);
+}
+.pill-group button:last-child {
+  border-right: none;
+}
+.pill-group button:hover {
+  background: var(--bg-3);
+}
+.pill-group button.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* portfolio switcher */
+.topbar-pf {
+  position: relative;
+}
+.topbar-pf .input {
+  width: auto;
+  min-width: 150px;
+}
+
+/* leverage / balances */
+.topbar-stat {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  padding: 0 4px;
+}
+.topbar-stat .lbl {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-2);
+}
+.topbar-stat .val {
+  font-size: 13px;
+  font-weight: 600;
+}
+.topbar-lev {
+  cursor: pointer;
+}
+.topbar-lev:hover .val {
+  color: var(--accent);
+}
+
+.conn-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--text-2);
+}
+.conn-dot.on {
+  background: var(--up);
+  box-shadow: 0 0 6px var(--up);
+}
+
+/* modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.modal {
+  width: 380px;
+  background: var(--bg-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+.modal h3 {
+  margin: 0 0 14px;
+  font-size: 15px;
+}
+.modal-row {
+  margin-bottom: 12px;
+}
+.modal-row label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-2);
+  margin-bottom: 4px;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+.modal-err {
+  color: var(--down);
+  font-size: 12px;
+  margin-bottom: 10px;
+}

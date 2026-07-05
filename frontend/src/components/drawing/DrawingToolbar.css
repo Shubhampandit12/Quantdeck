@@ -1,0 +1,95 @@
+/* Vertical drawing toolbar pinned to the left edge of the chart. */
+.qd-drawtoolbar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 40px;
+  height: 100%;
+  padding: 6px 0;
+  background: var(--bg-1);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  overflow-x: visible;
+  z-index: 5;
+}
+/* hide scrollbar visually but keep scrollable */
+.qd-drawtoolbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.qd-drawtoolbar__group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+}
+
+.qd-drawtoolbar__divider {
+  width: 20px;
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+.qd-drawtoolbar__spacer {
+  flex: 1 1 auto;
+}
+
+.qd-drawtoolbar__btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-1);
+  font-size: 16px;
+  line-height: 1;
+  transition: background 0.1s ease, color 0.1s ease;
+}
+.qd-drawtoolbar__btn:hover {
+  background: var(--bg-3);
+  color: var(--text-0);
+}
+.qd-drawtoolbar__btn.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.qd-drawtoolbar__icon {
+  pointer-events: none;
+}
+
+.qd-drawtoolbar__trash:hover {
+  color: var(--down);
+}
+
+/* Tooltip flyout to the right of a button. */
+.qd-drawtoolbar__tip {
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  background: var(--bg-2);
+  color: var(--text-0);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  font-size: 12px;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.1s ease;
+  z-index: 20;
+}
+.qd-drawtoolbar__btn:hover .qd-drawtoolbar__tip {
+  opacity: 1;
+}
