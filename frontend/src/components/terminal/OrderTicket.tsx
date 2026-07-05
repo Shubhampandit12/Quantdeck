@@ -40,11 +40,28 @@ export default function OrderTicket({ symbol }: Props) {
   const [sl, setSl] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<Msg>(null);
+  const [levBusy, setLevBusy] = useState(false);
 
   const pf = snapshot?.portfolio;
   const liveQuote = quotes[symbol];
   const refPrice = liveQuote?.price ?? null;
   const leverage = pf?.leverage ?? 1;
+
+  // Change leverage right from the ticket (persists to the portfolio, same as
+  // the TopBar control). Applies to the buy/long and sell/short you place next.
+  async function changeLeverage(next: number) {
+    if (!activePortfolioId || !Number.isFinite(next)) return;
+    const clamped = Math.max(1, Math.min(125, next));
+    setLevBusy(true);
+    try {
+      await api.setLeverage(activePortfolioId, clamped);
+      await refreshSnapshot();
+    } catch (e) {
+      setMsg({ kind: "err", text: e instanceof ApiError ? e.message : "Failed to set leverage" });
+    } finally {
+      setLevBusy(false);
+    }
+  }
 
   const needsLimit = type === "limit" || type === "stop_limit";
   const needsStop = type === "stop" || type === "stop_limit";
@@ -163,10 +180,36 @@ export default function OrderTicket({ symbol }: Props) {
         </div>
       )}
 
-      {/* leverage (portfolio-level, editable in TopBar) */}
+      {/* leverage — editable right here; applies to the position you open next */}
       <div className="ticket-field">
-        <label>Leverage (portfolio)</label>
-        <input className="input" value={`${leverage}x`} readOnly />
+        <label>Leverage · {leverage}x</label>
+        <div className="ticket-lev">
+          {[1, 2, 5, 10, 20, 50].map((l) => (
+            <button
+              key={l}
+              type="button"
+              className={`ticket-lev-btn${leverage === l ? " active" : ""}`}
+              disabled={levBusy}
+              onClick={() => changeLeverage(l)}
+            >
+              {l}x
+            </button>
+          ))}
+          <input
+            className="input ticket-lev-input"
+            type="number"
+            min={1}
+            max={125}
+            step={1}
+            value={leverage}
+            disabled={levBusy}
+            title="Custom leverage"
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              if (Number.isFinite(v) && v >= 1) changeLeverage(v);
+            }}
+          />
+        </div>
       </div>
 
       {/* TP / SL toggles */}

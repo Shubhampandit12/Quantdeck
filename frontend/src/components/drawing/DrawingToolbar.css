@@ -1,5 +1,10 @@
-/* Vertical drawing toolbar pinned to the left edge of the chart. */
+/* Vertical drawing toolbar pinned to the left edge of the chart. It is absolutely
+   positioned and sits ABOVE the chart canvas + drawing overlay so its buttons
+   are actually clickable (the chart canvas would otherwise paint over it). */
 .qd-drawtoolbar {
+  position: absolute;
+  top: 0;
+  left: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -11,7 +16,7 @@
   border-right: 1px solid var(--border);
   overflow-y: auto;
   overflow-x: visible;
-  z-index: 5;
+  z-index: 30;
 }
 /* hide scrollbar visually but keep scrollable */
 .qd-drawtoolbar::-webkit-scrollbar {

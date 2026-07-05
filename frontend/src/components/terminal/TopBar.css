@@ -188,6 +188,16 @@
   gap: 8px;
   margin-top: 8px;
 }
+.modal-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.modal-preset {
+  flex: 1 1 auto;
+  padding: 6px 8px;
+  font-size: 12px;
+}
 .modal-err {
   color: var(--down);
   font-size: 12px;

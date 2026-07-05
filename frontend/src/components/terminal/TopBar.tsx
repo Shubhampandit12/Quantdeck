@@ -33,6 +33,7 @@ export default function TopBar({ timeframe, onTimeframe, onSelectSymbol, connect
   const [showNew, setShowNew] = useState(false);
   const [showReset, setShowReset] = useState(false);
   const [showLev, setShowLev] = useState(false);
+  const [showBalance, setShowBalance] = useState(false);
 
   const pf = snapshot?.portfolio;
 
@@ -157,9 +158,13 @@ export default function TopBar({ timeframe, onTimeframe, onSelectSymbol, connect
         <span className="val">{pf ? `${pf.leverage}x` : "—"}</span>
       </div>
 
-      {/* balance / equity */}
-      <div className="topbar-stat">
-        <span className="lbl">Cash</span>
+      {/* balance / equity — click Cash to change your demo balance */}
+      <div
+        className="topbar-stat topbar-lev"
+        onClick={() => pf && setShowBalance(true)}
+        title="Click to change your demo balance"
+      >
+        <span className="lbl">Cash ✎</span>
         <span className="val mono">{fmtUsd(pf?.cash)}</span>
       </div>
       <div className="topbar-stat">
@@ -208,6 +213,17 @@ export default function TopBar({ timeframe, onTimeframe, onSelectSymbol, connect
           onDone={async () => {
             await refreshSnapshot();
             setShowLev(false);
+          }}
+        />
+      )}
+      {showBalance && pf && (
+        <BalanceModal
+          id={pf.id}
+          current={pf.starting_balance}
+          onClose={() => setShowBalance(false)}
+          onDone={async () => {
+            await refreshSnapshot();
+            setShowBalance(false);
           }}
         />
       )}
@@ -395,6 +411,80 @@ function LeverageModal({
         </button>
         <button className="btn btn-primary" onClick={submit} disabled={busy}>
           {busy ? "Saving…" : "Save"}
+        </button>
+      </div>
+    </ModalShell>
+  );
+}
+
+// Change the demo (paper) balance with one-click presets or a custom amount.
+// This resets the account to the chosen starting cash (paper money only).
+function BalanceModal({
+  id,
+  current,
+  onClose,
+  onDone,
+}: {
+  id: string;
+  current: number;
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const [balance, setBalance] = useState(current);
+  const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const PRESETS = [10_000, 100_000, 500_000, 1_000_000, 10_000_000];
+
+  async function submit() {
+    setBusy(true);
+    setErr(null);
+    try {
+      await api.resetPortfolio(id, balance);
+      onDone();
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.message : "Failed to set balance");
+      setBusy(false);
+    }
+  }
+
+  return (
+    <ModalShell title="Set demo balance" onClose={onClose}>
+      {err && <div className="modal-err">{err}</div>}
+      <p className="muted" style={{ marginTop: 0 }}>
+        Set how much paper money you start with. This resets the account to the
+        chosen cash and clears open positions/orders. Demo money only.
+      </p>
+      <div className="modal-row">
+        <label>Quick amounts</label>
+        <div className="modal-presets">
+          {PRESETS.map((v) => (
+            <button
+              key={v}
+              type="button"
+              className={`btn modal-preset${balance === v ? " btn-primary" : ""}`}
+              onClick={() => setBalance(v)}
+            >
+              {v >= 1_000_000 ? `$${v / 1_000_000}M` : `$${v / 1_000}k`}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="modal-row">
+        <label>Custom amount (USD)</label>
+        <input
+          className="input"
+          type="number"
+          min={1}
+          value={balance}
+          onChange={(e) => setBalance(Number(e.target.value))}
+        />
+      </div>
+      <div className="modal-actions">
+        <button className="btn" onClick={onClose}>
+          Cancel
+        </button>
+        <button className="btn btn-primary" onClick={submit} disabled={busy || balance <= 0}>
+          {busy ? "Applying…" : `Set ${fmtUsd(balance)}`}
         </button>
       </div>
     </ModalShell>
