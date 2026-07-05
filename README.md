@@ -6,6 +6,9 @@ on rich charts, hand an AI a plain-English strategy and let it trade your paper
 account via MCP, ask the AI for one-off manual trades, or inject your own Python
 strategy to backtest and run live.
 
+![Home page](docs/screenshots/home.png)
+![Trading terminal](docs/screenshots/terminal-with-position.png)
+
 > **No real money, ever.** There is no brokerage integration and no code path,
 > config flag, or credential that can route an order to a real exchange. The only
 > external credentials used are *read-only* market-data keys and an optional
