@@ -62,7 +62,21 @@ See `docs/SPINE.md` (module map), `docs/API_CONTRACT.md` (REST/WS contract),
 
 ---
 
-## Quick start — one command
+## Deploy / host it
+
+QuantDeck ships as a single Docker image (backend serves the built frontend on
+one origin). Easiest host is **Render** — push to GitHub, then New + →
+Blueprint → pick the repo (it reads `render.yaml`). Or run the image anywhere:
+
+```bash
+docker build -t quantdeck . && docker run -p 8000:8000 quantdeck
+```
+
+Full instructions, plans, and the AI-key/auth caveat: **[docs/DEPLOY.md](docs/DEPLOY.md)**.
+
+---
+
+## Quick start — one command (local dev)
 
 ```bash
 ./start.sh

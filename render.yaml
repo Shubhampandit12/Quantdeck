@@ -1,0 +1,37 @@
+# Render blueprint for QuantDeck — one always-on web service running the
+# Docker image (backend + built frontend on a single origin).
+#
+# Deploy: push this repo to GitHub, then on https://render.com →
+#   New + → Blueprint → pick the Quantdeck repo. Render reads this file.
+#
+# Notes:
+#  - WebSockets (/ws/*) work on Render web services out of the box.
+#  - The `free` plan sleeps after ~15 min idle (first request after is slow) and
+#    has an EPHEMERAL disk, so paper portfolios reset on restart/redeploy. Bump
+#    to `starter` ($7/mo) for always-on. Add a disk (below) to persist the DB.
+#  - AI is intentionally left OFF (no ANTHROPIC_API_KEY) — there's no auth, so
+#    a public URL with a key set would let anyone spend your AI credits.
+services:
+  - type: web
+    name: quantdeck
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free            # change to "starter" for always-on ($7/mo)
+    healthCheckPath: /api/health
+    autoDeploy: true      # redeploy on every push to the default branch
+    envVars:
+      - key: QUANTDECK_HOST
+        value: 0.0.0.0
+      # AI disabled by default. To enable later, add ANTHROPIC_API_KEY as a
+      # SECRET in the Render dashboard (never commit it), and ideally add auth.
+      #
+      # Optional real-time US-stock data (else Yahoo 15-min delayed is used):
+      # - key: QUANTDECK_FINNHUB_API_KEY
+      #   sync: false      # set the value in the dashboard, not in git
+
+    # To make paper portfolios survive restarts, attach a persistent disk and
+    # point the DB at it (uncomment; requires a paid plan):
+    # disk:
+    #   name: quantdeck-data
+    #   mountPath: /app/backend/data
+    #   sizeGB: 1

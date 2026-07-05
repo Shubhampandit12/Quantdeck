@@ -14,10 +14,13 @@ from __future__ import annotations
 
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
+from typing import Optional
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from ..core.config import settings
 from ..db.database import init_db
@@ -108,17 +111,72 @@ def create_app() -> FastAPI:
             "default_portfolio_id": deps.get_default_portfolio_id(),
         }
 
-    @app.get("/", include_in_schema=False)
-    async def root() -> JSONResponse:
-        """Root note — the API lives under /api; the SPA is served separately."""
-        return JSONResponse(
-            {
-                "name": "QuantDeck API",
-                "version": __version__,
-                "docs": "/docs",
-                "api_base": "/api",
-                "note": "Paper-trading only — demo money, no real broker.",
-            }
-        )
+    # ------------------------------------------------------------------ #
+    # Serve the built React frontend from the same origin (production).   #
+    # In a deployed build the Vite output is copied next to the backend   #
+    # (see the Dockerfile). Because the frontend uses relative URLs        #
+    # (/api, ws://<host>/ws), one origin means zero CORS/config. When the  #
+    # build isn't present (local dev, where Vite serves on :5173), we fall #
+    # back to a small JSON note at "/".                                    #
+    # ------------------------------------------------------------------ #
+    _mount_frontend(app)
 
     return app
+
+
+def _frontend_dir() -> Optional[Path]:
+    """Locate the built frontend (index.html + assets), if present.
+
+    Checks a few conventional spots so it works whether the build sits next to
+    the package (Docker) or in the repo's frontend/dist (local `npm run build`).
+    """
+    candidates = [
+        Path(__file__).resolve().parents[2] / "frontend_dist",   # Docker layout
+        Path(__file__).resolve().parents[3] / "frontend" / "dist",  # repo layout
+    ]
+    for c in candidates:
+        if (c / "index.html").exists():
+            return c
+    return None
+
+
+def _mount_frontend(app: FastAPI) -> None:
+    frontend = _frontend_dir()
+
+    if frontend is None:
+        @app.get("/", include_in_schema=False)
+        async def root() -> JSONResponse:
+            """Dev fallback — the SPA is served by Vite on :5173."""
+            return JSONResponse(
+                {
+                    "name": "QuantDeck API",
+                    "version": __version__,
+                    "docs": "/docs",
+                    "api_base": "/api",
+                    "note": "Frontend build not found; run the Vite dev server "
+                    "or build it. Paper-trading only — demo money.",
+                }
+            )
+        return
+
+    # Serve hashed static assets (JS/CSS) with normal file handling.
+    assets = frontend / "assets"
+    if assets.is_dir():
+        app.mount("/assets", StaticFiles(directory=str(assets)), name="assets")
+
+    index_file = frontend / "index.html"
+
+    # SPA catch-all: any non-/api, non-/ws path returns index.html so client-side
+    # routes like /terminal/BTC%2FUSDT deep-link correctly. Real files (favicon,
+    # etc.) at the frontend root are served directly.
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def spa(full_path: str):
+        if full_path.startswith(("api/", "api", "ws/", "ws", "docs", "redoc", "openapi")):
+            # Let the real routes 404 naturally rather than shadow them.
+            return JSONResponse({"detail": "Not Found"}, status_code=404)
+        candidate = frontend / full_path
+        if full_path and candidate.is_file():
+            return FileResponse(str(candidate))
+        return FileResponse(str(index_file))
+
+    log.info("serving frontend from %s", frontend)

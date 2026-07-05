@@ -1,0 +1,18 @@
+# Keep the build context small and never ship secrets or local artifacts.
+**/.env
+**/.env.*
+!**/.env.example
+**/.venv
+**/venv
+**/__pycache__
+**/*.pyc
+**/node_modules
+**/dist
+**/frontend_dist
+**/data/*.db
+**/*.db
+**/*.log
+.git
+.claude
+docs/screenshots
+.DS_Store
