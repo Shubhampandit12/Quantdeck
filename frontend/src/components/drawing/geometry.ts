@@ -86,6 +86,22 @@ export function toData(
   return { time, price };
 }
 
+/** Extend segment a->b to (roughly) the chart edges. Returns [start, end].
+ *  `both=false` extends only past b (a ray); `both=true` extends both ways.
+ *  Shared by the renderer and the hit-tester so their geometry matches. */
+export function extendLine(a: Px, b: Px, w: number, h: number, both = false): [Px, Px] {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  if (dx === 0 && dy === 0) return [a, b];
+  const far = Math.max(w, h) * 4;
+  const len = Math.hypot(dx, dy);
+  const ux = dx / len;
+  const uy = dy / len;
+  const forward: Px = { x: b.x + ux * far, y: b.y + uy * far };
+  const backward: Px = { x: a.x - ux * far, y: a.y - uy * far };
+  return both ? [backward, forward] : [a, forward];
+}
+
 /** Distance from point P to segment AB (all in pixels). */
 export function distToSegment(p: Px, a: Px, b: Px): number {
   const dx = b.x - a.x;

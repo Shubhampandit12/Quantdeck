@@ -26,11 +26,12 @@ import {
   type DrawPoint,
   type LineStyle,
 } from "./types";
-import { toolPointCount } from "./tools";
+import { toolPointCount, FIB_FAN_LEVELS } from "./tools";
 import { renderDrawing, type RenderCtx } from "./render";
 import {
   distToPolyline,
   distToSegment,
+  extendLine,
   nearRect,
   toData,
   toPixel,
@@ -204,8 +205,22 @@ export default function DrawingLayer({ chart, series, symbol, containerRef }: Dr
       case "ray":
       case "extended":
       case "arrow":
-      case "fib_fan":
         return !!a && !!b && distToSegment(pt, a, b) <= HIT_PAD;
+      case "fib_fan": {
+        // The fan renders a base line PLUS a spoke per fib level radiating from
+        // the origin. Hit-test against ALL of them (matching render.tsx) so a
+        // click on any visible spoke selects the drawing — not just the base.
+        if (!a || !b) return false;
+        if (distToSegment(pt, a, b) <= HIT_PAD) return true;
+        const dyTotal = b.y - a.y;
+        const dirX = extendLine(a, b, size.w, size.h)[1].x - a.x;
+        for (const lv of FIB_FAN_LEVELS) {
+          const dir = { x: a.x + dirX, y: a.y + dyTotal * lv };
+          const end = extendLine(a, dir, size.w, size.h)[1];
+          if (distToSegment(pt, a, end) <= HIT_PAD) return true;
+        }
+        return false;
+      }
       case "hline": {
         const y = ctxConv.priceToY(d.points[0].price);
         return y !== null && Math.abs(pt.y - y) <= HIT_PAD;

@@ -9,7 +9,7 @@ import {
   FIB_EXTENSION_LEVELS,
   FIB_FAN_LEVELS,
 } from "./tools";
-import type { Px } from "./geometry";
+import { extendLine, type Px } from "./geometry";
 
 export interface RenderCtx {
   /** Convert a data point to pixels; null if currently off-scale. */
@@ -58,20 +58,6 @@ function Label(props: { x: number; y: number; text: string; color?: string; anch
   );
 }
 
-/** Extend segment a->b to the chart edges in one or both directions. */
-function extendLine(a: Px, b: Px, w: number, h: number, both: boolean): [Px, Px] {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  if (dx === 0 && dy === 0) return [a, b];
-  // Parametric: solve for the largest t that keeps point on-canvas.
-  const far = Math.max(w, h) * 4;
-  const len = Math.hypot(dx, dy);
-  const ux = dx / len;
-  const uy = dy / len;
-  const forward: Px = { x: b.x + ux * far, y: b.y + uy * far };
-  const backward: Px = { x: a.x - ux * far, y: a.y - uy * far };
-  return both ? [backward, forward] : [a, forward];
-}
 
 /** Selection handles drawn at each anchor when the drawing is selected. */
 function Handles({ pts }: { pts: Px[] }) {
