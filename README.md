@@ -62,39 +62,41 @@ See `docs/SPINE.md` (module map), `docs/API_CONTRACT.md` (REST/WS contract),
 
 ---
 
-## Quick start
-
-### 1. Backend
+## Quick start — one command
 
 ```bash
-cd backend
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env          # optional: add ANTHROPIC_API_KEY / data keys
-python -m uvicorn quantdeck.api.app:create_app --factory --host 0.0.0.0 --port 8000
+./start.sh
 ```
 
-- API docs: http://localhost:8000/docs
-- Health: http://localhost:8000/api/health
+That's it. This single command:
+- on first run, creates the Python venv, installs backend deps, and runs
+  `npm install`;
+- starts the **backend API** (http://localhost:8000) and the **frontend**
+  (http://localhost:5173) together;
+- waits for the backend to be healthy before opening the UI;
+- stops **both** cleanly when you press **Ctrl+C**.
+
+Then open **http://localhost:5173** — the home page opens into the terminal.
+
+Ports are configurable: `QUANTDECK_PORT=9000 FRONTEND_PORT=5000 ./start.sh`.
 
 Runs fully offline for crypto (Binance is public). US-equity real-time needs a
-free Finnhub/Alpaca key; otherwise it falls back to Yahoo (15-min delayed).
+free Finnhub/Alpaca key; otherwise it falls back to Yahoo (15-min delayed). Add
+`ANTHROPIC_API_KEY` to `backend/.env` to enable the AI features.
 
-### 2. Frontend
+<details>
+<summary>Prefer to run the two services separately?</summary>
 
 ```bash
-cd frontend
-npm install
-npm run dev          # http://localhost:5173 (proxies /api and /ws to :8000)
+./scripts/run_backend.sh     # API on :8000
+./scripts/run_frontend.sh    # UI on :5173 (in another terminal)
 ```
+</details>
 
-Open http://localhost:5173 — the home page opens into the terminal.
-
-### 3. Run the tests
+### Run the tests
 
 ```bash
-cd backend && source .venv/bin/activate
-pytest -q
+cd backend && source .venv/bin/activate && pytest -q
 ```
 
 ---
