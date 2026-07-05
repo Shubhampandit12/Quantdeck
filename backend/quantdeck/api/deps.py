@@ -12,6 +12,7 @@ the single risk-check / marking path the spine mandates.
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Optional
 
@@ -38,6 +39,36 @@ _ai_manager: Optional[AISessionManager] = None
 # immediately (the UI / AI chat need at least one account to point at).
 _default_portfolio_id: Optional[str] = None
 
+# Background task that streams live prices into the engine so positions
+# mark-to-market and resting orders / bracket stops & targets actually trigger.
+_market_feed_task: Optional["asyncio.Task"] = None
+# How often to poll live prices for symbols the engine is holding/watching.
+MARKET_FEED_INTERVAL_S = 3.0
+
+
+async def _market_feed_loop() -> None:
+    """Poll live prices for every symbol the engine is tracking and feed them to
+    `engine.on_quote`. This is what makes stops/targets fire and P&L update in
+    real time. Runs for the life of the process; resilient to transient errors.
+    """
+    assert _engine is not None and _market_data is not None
+    log.info("market feed loop started (interval=%.1fs)", MARKET_FEED_INTERVAL_S)
+    while True:
+        try:
+            symbols = _engine.tracked_symbols()
+            for sym in symbols:
+                try:
+                    price = await _market_data.get_price(sym)
+                except Exception:
+                    continue  # provider hiccup — skip this symbol this tick
+                await _engine.on_quote(sym, price)
+        except asyncio.CancelledError:
+            log.info("market feed loop stopped")
+            raise
+        except Exception:  # pragma: no cover - keep the loop alive
+            log.exception("market feed loop error (continuing)")
+        await asyncio.sleep(MARKET_FEED_INTERVAL_S)
+
 
 async def setup_singletons() -> None:
     """Build and wire every collaborator. Idempotent — safe to call twice.
@@ -47,7 +78,7 @@ async def setup_singletons() -> None:
     strategy manager / backtester / AI manager, which all drive it.
     """
     global _market_data, _engine, _strategy_manager, _backtester, _ai_manager
-    global _default_portfolio_id
+    global _default_portfolio_id, _market_feed_task
 
     if _engine is not None:  # already wired — do not rebuild collaborators
         return
@@ -68,6 +99,10 @@ async def setup_singletons() -> None:
     # Ensure at least one portfolio exists so the platform is usable on a fresh
     # database. Reuse an existing one if present.
     await _ensure_default_portfolio()
+
+    # Start the live market-feed loop so positions mark-to-market and bracket
+    # stops/targets trigger in real time.
+    _market_feed_task = asyncio.create_task(_market_feed_loop())
 
     log.info(
         "API singletons ready (ai_enabled=%s, default_portfolio=%s)",
@@ -98,6 +133,14 @@ async def _ensure_default_portfolio() -> None:
 async def teardown_singletons() -> None:
     """Release resources (market-data sockets/clients) on shutdown."""
     global _market_data, _engine, _strategy_manager, _backtester, _ai_manager
+    global _market_feed_task
+    if _market_feed_task is not None:
+        _market_feed_task.cancel()
+        try:
+            await _market_feed_task
+        except (asyncio.CancelledError, Exception):  # pragma: no cover
+            pass
+        _market_feed_task = None
     if _market_data is not None:
         try:
             await _market_data.aclose()

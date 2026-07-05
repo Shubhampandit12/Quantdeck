@@ -1,25 +1,40 @@
 /* TerminalPage — TradingView-like CSS grid layout.
    Rows: topbar (full width) / body / commandbar.
-   Body columns: left watchlist / center (chart + bottom panel) / right (ticket + summary). */
+   Body columns: left watchlist / center (chart + bottom panel) / right (ticket + summary).
+   The layout stays information-dense (it's a trading terminal) but gets rounded
+   surfaces, soft hairline seams, and consistent breathing room. */
 .terminal {
   display: grid;
   grid-template-rows: var(--topbar-h) 1fr auto;
   height: 100vh;
-  width: 100vw;
+  width: 100%;
+  max-width: 100%;
   overflow: hidden;
   background: var(--bg-0);
 }
 
 .terminal-body {
   display: grid;
-  grid-template-columns: 260px 1fr 320px;
+  grid-template-columns: 264px minmax(0, 1fr) 320px;
+  gap: var(--sp-2);
+  padding: var(--sp-2);
   min-height: 0; /* allow children to shrink */
   overflow: hidden;
 }
 
+/* Each region is a softly rounded, raised surface floating on the app bg. */
+.terminal-left,
+.terminal-center-chart,
+.terminal-center-bottom,
+.terminal-right {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
 /* Left panel: watchlist */
 .terminal-left {
-  border-right: 1px solid var(--border);
   min-width: 0;
   min-height: 0;
   display: flex;
@@ -30,7 +45,8 @@
 /* Center column: chart on top, bottom tabbed panel below */
 .terminal-center {
   display: grid;
-  grid-template-rows: 1fr 260px;
+  grid-template-rows: 1fr 288px;
+  gap: var(--sp-3);
   min-width: 0;
   min-height: 0;
   overflow: hidden;
@@ -39,7 +55,6 @@
 .terminal-center-chart {
   min-height: 0;
   overflow: hidden;
-  border-bottom: 1px solid var(--border);
 }
 
 .terminal-center-bottom {
@@ -49,7 +64,6 @@
 
 /* Right panel: order ticket + portfolio summary */
 .terminal-right {
-  border-left: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   min-height: 0;

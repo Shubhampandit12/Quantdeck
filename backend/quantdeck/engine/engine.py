@@ -128,6 +128,26 @@ class TradingEngine:
     # ------------------------------------------------------------------ #
     # Internal helpers                                                    #
     # ------------------------------------------------------------------ #
+    def tracked_symbols(self) -> list[str]:
+        """Symbols the engine currently needs live prices for — any symbol with
+        an open position or a resting order. The market-feed loop polls these
+        and calls `on_quote` so positions mark-to-market and resting orders /
+        bracket stops & targets trigger.
+        """
+        symbols: set[str] = set()
+        for book in self._books.values():
+            for pos in book.positions.values():
+                if pos.side is not PositionSide.FLAT and pos.quantity > 0:
+                    symbols.add(pos.symbol)
+            for order in book.orders.values():
+                if order.status in (
+                    OrderStatus.OPEN,
+                    OrderStatus.PENDING,
+                    OrderStatus.PARTIALLY_FILLED,
+                ):
+                    symbols.add(order.symbol)
+        return sorted(symbols)
+
     def _index_symbol(self, symbol: str, portfolio_id: str) -> None:
         self._symbol_index.setdefault(symbol, set()).add(portfolio_id)
 

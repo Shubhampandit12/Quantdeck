@@ -1,27 +1,39 @@
-/* PortfolioSummary — compact stat grid. */
+/* PortfolioSummary — stat grid with clear label/value hierarchy. */
 .pfsummary {
-  border-bottom: 1px solid var(--border);
+  padding: var(--sp-2) var(--sp-5) var(--sp-5);
+}
+.pfsummary .panel-title {
+  padding: var(--sp-3) 0;
+  border-bottom: none;
 }
 .pfsummary-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  background: var(--border);
+  gap: var(--sp-2);
 }
 .pfstat {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 8px 12px;
-  background: var(--bg-1);
+  gap: var(--sp-1);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--bg-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+.pfstat:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-2);
 }
 .pfstat-lbl {
-  font-size: 10px;
+  font-size: 9px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.07em;
+  font-weight: 600;
   color: var(--text-2);
 }
 .pfstat-val {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
+  color: var(--text-0);
 }

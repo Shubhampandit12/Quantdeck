@@ -16,7 +16,7 @@
 // The active tool is read from the shared `useDrawingTool` store, keeping this
 // component's frozen prop signature { chart, series, symbol, containerRef }.
 import React, { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { IChartApi, ISeriesApi, Time } from "lightweight-charts";
+import type { IChartApi, ISeriesApi } from "lightweight-charts";
 import {
   DEFAULT_COLOR,
   DEFAULT_STYLE,
@@ -34,6 +34,7 @@ import {
   nearRect,
   toData,
   toPixel,
+  timeToX as projectTimeToX,
   type Px,
 } from "./geometry";
 import { makeId, useDrawings } from "./useDrawings";
@@ -167,10 +168,7 @@ export default function DrawingLayer({ chart, series, symbol, containerRef }: Dr
     if (!chart || !series) return null;
     const toPx = (p: DrawPoint): Px | null => toPixel(chart, series, p);
     const priceToY = (price: number): number | null => series.priceToCoordinate(price);
-    const timeToX = (time: number): number | null => {
-      const x = chart.timeScale().timeToCoordinate(time as Time);
-      return x === null ? null : x;
-    };
+    const timeToX = (time: number): number | null => projectTimeToX(chart, time);
     return { toPx, priceToY, timeToX };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chart, series, size.w, size.h, drawings]);

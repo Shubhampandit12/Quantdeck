@@ -1,90 +1,116 @@
-/* OrderTicket — right-panel order entry form. */
+/* OrderTicket — right-panel order entry form.
+   Roomy padding, rounded segmented controls, comfortable field spacing,
+   and a prominent buy/long vs sell/short affordance. */
 .ticket {
-  padding: 10px 12px;
+  padding: var(--sp-4);
   border-bottom: 1px solid var(--border);
 }
 
+/* Buy / Sell — big, rounded segmented toggle. */
 .ticket-side {
   display: flex;
-  gap: 6px;
-  margin-bottom: 10px;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-4);
 }
 .ticket-side button {
   flex: 1;
-  padding: 8px 0;
+  padding: 12px 0;
   border: 1px solid var(--border-strong);
   background: var(--bg-2);
   color: var(--text-1);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   font-weight: 700;
   font-size: 13px;
+  letter-spacing: 0.01em;
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+.ticket-side button:hover {
+  color: var(--text-0);
+  border-color: var(--border-strong);
+  background: var(--bg-3);
 }
 .ticket-side button.buy.active {
   background: var(--up);
   border-color: var(--up);
   color: #04120f;
+  box-shadow: 0 6px 18px var(--up-bg);
 }
 .ticket-side button.sell.active {
   background: var(--down);
   border-color: var(--down);
   color: #1a0505;
+  box-shadow: 0 6px 18px var(--down-bg);
 }
 
+/* Order type — rounded segmented control on a soft track. */
 .ticket-types {
   display: flex;
-  gap: 4px;
-  margin-bottom: 10px;
+  gap: 3px;
+  margin-bottom: var(--sp-4);
+  padding: 3px;
+  background: var(--bg-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
 }
 .ticket-types button {
   flex: 1;
-  padding: 6px 0;
+  padding: 8px 0;
   font-size: 11px;
-  border: 1px solid var(--border);
-  background: var(--bg-1);
+  font-weight: 600;
+  border: none;
+  background: transparent;
   color: var(--text-1);
   border-radius: var(--radius-sm);
+  transition: background 0.16s ease, color 0.16s ease;
+}
+.ticket-types button:hover {
+  color: var(--text-0);
+  background: var(--bg-2);
 }
 .ticket-types button.active {
   background: var(--bg-3);
   color: var(--text-0);
-  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
 }
 
 .ticket-field {
-  margin-bottom: 9px;
+  margin-bottom: var(--sp-4);
 }
 .ticket-field label {
   display: block;
   font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
+  font-weight: 600;
   color: var(--text-2);
-  margin-bottom: 3px;
+  margin-bottom: var(--sp-2);
 }
 
 .ticket-grid2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: var(--sp-3);
 }
 
 /* Leverage quick-select buttons + custom input. */
 .ticket-lev {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: var(--sp-2);
   align-items: center;
 }
 .ticket-lev-btn {
   flex: 1 1 auto;
-  min-width: 34px;
-  padding: 5px 0;
+  min-width: 38px;
+  padding: 8px 0;
   font-size: 12px;
+  font-weight: 600;
   color: var(--text-1);
   background: var(--bg-0);
   border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  transition: background 0.1s ease, color 0.1s ease;
+  border-radius: var(--radius-pill);
+  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
 }
 .ticket-lev-btn:hover {
   background: var(--bg-3);
@@ -94,48 +120,66 @@
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
+  box-shadow: 0 2px 8px rgba(59, 123, 255, 0.3);
 }
 .ticket-lev-input {
-  width: 56px;
+  width: 60px;
   flex: 0 0 auto;
-  padding: 5px 6px;
+  padding: 8px 10px;
+  border-radius: var(--radius-pill);
+  text-align: center;
 }
 
 .ticket-toggle-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--sp-2);
   font-size: 12px;
   color: var(--text-1);
-  margin-bottom: 6px;
+  margin-bottom: var(--sp-3);
+  cursor: pointer;
+}
+.ticket-toggle-row input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--accent);
   cursor: pointer;
 }
 
+/* Estimate block — set apart on a soft rounded surface. */
 .ticket-info {
-  margin: 10px 0;
+  margin: var(--sp-4) 0;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--bg-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   font-size: 12px;
 }
 .ticket-info-row {
   display: flex;
   justify-content: space-between;
-  padding: 2px 0;
+  padding: 5px 0;
   color: var(--text-1);
 }
 .ticket-info-row .v {
   color: var(--text-0);
+  font-weight: 500;
 }
 
 .ticket-submit {
   width: 100%;
-  padding: 10px 0;
+  padding: 14px 0;
+  margin-top: var(--sp-1);
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  border-radius: var(--radius);
 }
 
 .ticket-msg {
-  margin-top: 8px;
+  margin-top: var(--sp-3);
   font-size: 12px;
-  padding: 6px 8px;
+  padding: 10px 12px;
   border-radius: var(--radius-sm);
 }
 .ticket-msg.err {

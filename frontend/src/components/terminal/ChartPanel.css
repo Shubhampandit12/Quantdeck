@@ -6,22 +6,29 @@
   min-height: 0;
   background: var(--bg-1);
   overflow: hidden;
+  border-radius: var(--radius);
 }
 
 /* header row: symbol + last price + data-source badge */
 .chart-head {
   position: absolute;
-  top: 8px;
-  left: 52px; /* clear the drawing toolbar */
+  top: var(--sp-3);
+  left: 56px; /* clear the drawing toolbar */
   z-index: 15;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--sp-3);
+  padding: 6px 12px;
+  background: color-mix(in srgb, var(--bg-1) 70%, transparent);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
   pointer-events: none;
 }
 .chart-head .sym {
   font-size: 15px;
   font-weight: 700;
+  letter-spacing: -0.01em;
 }
 .chart-head .last {
   font-size: 14px;

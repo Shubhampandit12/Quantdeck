@@ -1,70 +1,90 @@
-/* TopBar — full-width terminal header. */
+/* TopBar — full-width terminal header.
+   Taller bar, generous group spacing, pill toggles with rounded active states,
+   and stat blocks with a clear muted-label / bright-value hierarchy. */
 .topbar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--sp-3);
   height: var(--topbar-h);
-  padding: 0 12px;
+  padding: 0 var(--sp-4);
   background: var(--bg-1);
   border-bottom: 1px solid var(--border);
-  overflow: visible;
   white-space: nowrap;
+  /* Never let the header force the page wider than the viewport — otherwise the
+     right-hand order panel gets pushed off-screen on smaller laptops. Items
+     stay pinned; the search box is the flexible element that gives up width. */
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .topbar-logo {
+  display: inline-flex;
+  align-items: center;
   font-weight: 700;
-  font-size: 15px;
-  letter-spacing: 0.02em;
+  font-size: 18px;
+  letter-spacing: -0.01em;
   color: var(--text-0);
-  padding-right: 4px;
+  padding-right: var(--sp-1);
   cursor: pointer;
   text-decoration: none;
 }
 .topbar-logo:hover {
-  opacity: 0.85;
+  opacity: 0.9;
 }
 .topbar-logo span {
-  color: var(--accent);
+  background: var(--accent-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 .topbar-sep {
   width: 1px;
-  height: 24px;
+  height: 26px;
   background: var(--border);
+  flex-shrink: 0;
 }
 
 .topbar-spacer {
   flex: 1;
 }
 
-/* symbol search */
+/* symbol search — the flexible element that gives up width when space is tight */
 .topbar-search {
   position: relative;
-  width: 200px;
+  width: 224px;
+  min-width: 90px;
+  flex: 0 1 224px;
 }
 .topbar-search .input {
-  padding: 5px 8px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-0);
 }
 .topbar-results {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + var(--sp-2));
   left: 0;
   right: 0;
   z-index: 40;
-  max-height: 320px;
+  max-height: 340px;
   overflow-y: auto;
+  padding: var(--sp-1);
   background: var(--bg-2);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-lg);
 }
 .topbar-result {
   display: flex;
   justify-content: space-between;
-  gap: 8px;
-  padding: 7px 10px;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 9px 12px;
   cursor: pointer;
-  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius-sm);
 }
 .topbar-result:hover {
   background: var(--bg-3);
@@ -79,30 +99,37 @@
   max-width: 120px;
 }
 
-/* asset-class + timeframe pill groups */
+/* asset-class + timeframe pill groups — rounded, softly filled active state */
 .pill-group {
   display: inline-flex;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
+  gap: 2px;
+  padding: 3px;
+  background: var(--bg-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
 }
 .pill-group button {
-  background: var(--bg-1);
+  background: transparent;
   border: none;
   color: var(--text-1);
-  padding: 5px 9px;
+  padding: 6px 13px;
   font-size: 12px;
-  border-right: 1px solid var(--border);
-}
-.pill-group button:last-child {
-  border-right: none;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  transition: background 0.16s ease, color 0.16s ease;
 }
 .pill-group button:hover {
-  background: var(--bg-3);
+  color: var(--text-0);
+  background: var(--bg-2);
 }
 .pill-group button.active {
   background: var(--accent);
   color: #fff;
+  box-shadow: 0 2px 8px rgba(59, 123, 255, 0.32);
+}
+.pill-group button.active:hover {
+  background: var(--accent-hover);
 }
 
 /* portfolio switcher */
@@ -111,28 +138,42 @@
 }
 .topbar-pf .input {
   width: auto;
-  min-width: 150px;
+  min-width: 160px;
+  border-radius: var(--radius-pill);
+  padding: 8px 14px;
 }
 
-/* leverage / balances */
+/* leverage / balances — label above value, tight vertical rhythm */
 .topbar-stat {
   display: flex;
   flex-direction: column;
-  line-height: 1.15;
-  padding: 0 4px;
+  gap: 2px;
+  line-height: 1.1;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
 }
 .topbar-stat .lbl {
-  font-size: 10px;
+  font-size: 9px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   color: var(--text-2);
-}
-.topbar-stat .val {
-  font-size: 13px;
   font-weight: 600;
 }
+.topbar-stat .val {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-0);
+}
+/* Clickable stats (Cash / Leverage) read as interactive chips. */
 .topbar-lev {
   cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+.topbar-lev:hover {
+  background: var(--bg-2);
+  border-color: var(--border-strong);
 }
 .topbar-lev:hover .val {
   color: var(--accent);
@@ -143,63 +184,72 @@
   height: 9px;
   border-radius: 50%;
   background: var(--text-2);
+  flex-shrink: 0;
 }
 .conn-dot.on {
   background: var(--up);
-  box-shadow: 0 0 6px var(--up);
+  box-shadow: 0 0 0 4px var(--up-bg);
 }
 
 /* modal */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 100;
 }
 .modal {
-  width: 380px;
+  width: 420px;
+  max-width: calc(100vw - var(--sp-6));
   background: var(--bg-1);
   border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 18px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--sp-6);
 }
 .modal h3 {
-  margin: 0 0 14px;
-  font-size: 15px;
+  margin: 0 0 var(--sp-5);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 .modal-row {
-  margin-bottom: 12px;
+  margin-bottom: var(--sp-4);
 }
 .modal-row label {
   display: block;
   font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   color: var(--text-2);
-  margin-bottom: 4px;
+  font-weight: 600;
+  margin-bottom: var(--sp-2);
 }
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 8px;
+  gap: var(--sp-2);
+  margin-top: var(--sp-5);
 }
 .modal-presets {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--sp-2);
 }
 .modal-preset {
   flex: 1 1 auto;
-  padding: 6px 8px;
+  padding: 8px 12px;
   font-size: 12px;
 }
 .modal-err {
   color: var(--down);
+  background: var(--down-bg);
   font-size: 12px;
-  margin-bottom: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--sp-4);
 }

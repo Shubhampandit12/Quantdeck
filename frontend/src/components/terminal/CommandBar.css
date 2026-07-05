@@ -1,4 +1,5 @@
-/* CommandBar — bottom NL / AI chat input with inline reply + trace. */
+/* CommandBar — bottom NL / AI chat input with inline reply + trace.
+   Sits below the body with comfortable padding and a rounded, focused input. */
 .commandbar {
   border-top: 1px solid var(--border);
   background: var(--bg-1);
@@ -6,16 +7,20 @@
 }
 
 .cmd-reply {
-  max-height: 160px;
+  max-height: 180px;
   overflow-y: auto;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--border);
+  margin: var(--sp-4) var(--sp-5) 0;
+  padding: var(--sp-4);
+  background: var(--bg-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   font-size: 12px;
 }
 .cmd-reply-text {
   color: var(--text-0);
   white-space: pre-wrap;
-  margin-bottom: 6px;
+  line-height: 1.6;
+  margin-bottom: var(--sp-2);
 }
 .cmd-trace {
   font-family: var(--font-mono);
@@ -23,29 +28,35 @@
   color: var(--text-1);
 }
 .cmd-trace-step {
-  padding: 2px 0;
+  padding: var(--sp-2) 0;
   border-top: 1px dashed var(--border);
 }
 .cmd-trace-kind {
   color: var(--accent);
-  margin-right: 6px;
+  margin-right: var(--sp-2);
   text-transform: uppercase;
+  letter-spacing: 0.04em;
   font-size: 10px;
+  font-weight: 600;
 }
 
 .cmd-input-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5);
 }
 .cmd-prompt {
   color: var(--accent);
   font-family: var(--font-mono);
+  font-size: 16px;
   font-weight: 700;
 }
 .cmd-input-row .input {
   flex: 1;
+  border-radius: var(--radius-pill);
+  padding: 11px 18px;
+  background: var(--bg-0);
 }
 .cmd-hint {
   color: var(--text-2);

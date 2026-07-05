@@ -1,5 +1,15 @@
 // Pure geometry helpers for the drawing layer: data<->pixel conversion and
 // hit-testing. Kept free of React so it stays easy to reason about/test.
+//
+// IMPORTANT — timeframe/zoom independence: a drawing is anchored to an absolute
+// timestamp (unix seconds). lightweight-charts' `timeToCoordinate()` only
+// returns a pixel when that EXACT timestamp is a bar on the *current* series —
+// so after switching 1h→1d (or panning so the point scrolls off), it returns
+// null and the drawing would vanish. To keep drawings pinned to their real
+// time at ANY timeframe/scale, we instead project time→x by LINEAR
+// INTERPOLATION across the visible time range (time is monotonic in x), which
+// is defined for every timestamp, on-scale or off. Price uses the same idea via
+// two reference prices when the point is outside the visible price range.
 import type { IChartApi, ISeriesApi, Time } from "lightweight-charts";
 import type { DrawPoint } from "./types";
 
@@ -8,13 +18,51 @@ export interface Px {
   y: number;
 }
 
-/** Convert a data-space point to pixel coordinates, or null if off-scale. */
+/** Project a timestamp (unix seconds) to an x pixel for the current view.
+ *  Works for any time, not just bar times, by interpolating the visible range. */
+export function timeToX(chart: IChartApi, time: number): number | null {
+  const ts = chart.timeScale();
+  // Fast path: an exact bar time.
+  const direct = ts.timeToCoordinate(time as Time);
+  if (direct !== null) return direct;
+
+  // Interpolate/extrapolate off the two ends of the visible time range.
+  const range = ts.getVisibleRange();
+  if (!range) return null;
+  const tFrom = range.from as number;
+  const tTo = range.to as number;
+  const xFrom = ts.timeToCoordinate(range.from);
+  const xTo = ts.timeToCoordinate(range.to);
+  if (xFrom === null || xTo === null || tTo === tFrom) return null;
+  const slope = (xTo - xFrom) / (tTo - tFrom);
+  return xFrom + (time - tFrom) * slope;
+}
+
+/** Project an x pixel back to a timestamp (unix seconds), for any x. */
+export function xToTime(chart: IChartApi, x: number): number | null {
+  const ts = chart.timeScale();
+  const direct = ts.coordinateToTime(x) as number | null;
+  if (direct !== null) return direct;
+
+  const range = ts.getVisibleRange();
+  if (!range) return null;
+  const tFrom = range.from as number;
+  const tTo = range.to as number;
+  const xFrom = ts.timeToCoordinate(range.from);
+  const xTo = ts.timeToCoordinate(range.to);
+  if (xFrom === null || xTo === null || xTo === xFrom) return null;
+  const slope = (tTo - tFrom) / (xTo - xFrom);
+  return Math.round(tFrom + (x - xFrom) * slope);
+}
+
+/** Convert a data-space point to pixel coordinates.
+ *  Returns null only if the chart has no usable scale yet. */
 export function toPixel(
   chart: IChartApi,
   series: ISeriesApi<"Candlestick">,
   p: DrawPoint,
 ): Px | null {
-  const x = chart.timeScale().timeToCoordinate(p.time as Time);
+  const x = timeToX(chart, p.time);
   const y = series.priceToCoordinate(p.price);
   if (x === null || y === null) return null;
   return { x, y };
@@ -22,9 +70,8 @@ export function toPixel(
 
 /**
  * Convert a pixel coordinate back to data space. Uses timeScale/series inverse
- * conversions. If the x maps to no bar time (e.g. right of the last bar), fall
- * back to a linear estimate off the visible logical range so drawings can still
- * be placed in the "future" whitespace.
+ * conversions, falling back to interpolation off the visible range so drawings
+ * can be placed anywhere (including the empty space right of the last candle).
  */
 export function toData(
   chart: IChartApi,
@@ -34,30 +81,9 @@ export function toData(
 ): DrawPoint | null {
   const price = series.coordinateToPrice(y);
   if (price === null) return null;
-
-  let time = chart.timeScale().coordinateToTime(x) as number | null;
-  if (time === null) {
-    time = estimateTimeFromX(chart, x);
-  }
+  const time = xToTime(chart, x);
   if (time === null) return null;
   return { time, price };
-}
-
-/**
- * Estimate a unix time for an x pixel using two known bar coordinates. Lets us
- * anchor drawings placed in the empty space to the right of the last candle.
- */
-function estimateTimeFromX(chart: IChartApi, x: number): number | null {
-  const ts = chart.timeScale();
-  const range = ts.getVisibleRange();
-  if (!range) return null;
-  const xFrom = ts.timeToCoordinate(range.from);
-  const xTo = ts.timeToCoordinate(range.to);
-  if (xFrom === null || xTo === null || xTo === xFrom) return null;
-  const tFrom = range.from as number;
-  const tTo = range.to as number;
-  const slope = (tTo - tFrom) / (xTo - xFrom);
-  return Math.round(tFrom + (x - xFrom) * slope);
 }
 
 /** Distance from point P to segment AB (all in pixels). */
