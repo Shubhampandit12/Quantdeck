@@ -31,7 +31,9 @@ _INTERVAL_MAP = {
     "15m": "15m",
     "30m": "30m",
     "1h": "60m",
-    "4h": "60m",   # yfinance has no native 4h; caller may resample if needed
+    # yfinance has no native 4h bar and we do not resample, so '4h' is refused
+    # (get_ohlcv raises DataUnavailableError) rather than returning 60m candles
+    # mislabelled as 4h — OHLCVResponse.interval must describe the true bars.
     "1d": "1d",
     "1w": "1wk",
 }

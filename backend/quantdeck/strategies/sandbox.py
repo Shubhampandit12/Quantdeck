@@ -443,6 +443,21 @@ class SandboxRunner:
         # Stream closed: if we exited without a clean stop, capture stderr.
         if not self._stopped.is_set() and not self.crashed:
             await self._capture_stderr()
+            # A signal death (negative returncode) leaves stderr empty, so
+            # inspect returncode explicitly. This is how a CPU-time limit
+            # (SIGXCPU) or a kill surfaces — otherwise crashed stays False and
+            # the manager only learns of it later as a misleading 'stream lost'.
+            if not self.crashed and self._proc is not None:
+                rc = self._proc.returncode
+                if rc is not None and rc < 0:
+                    self.crashed = True
+                    sig = -rc
+                    if sig == 24:  # SIGXCPU
+                        self.last_error = "CPU time limit exceeded"
+                    else:
+                        self.last_error = f"strategy killed by signal {sig}"
+                    if self._error_cb:
+                        self._error_cb(self.last_error)
         # A child that closed its pipe before ready also unblocks start().
         if not self._ready.is_set():
             self._load_failed.set()

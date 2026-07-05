@@ -278,7 +278,7 @@ function NewPortfolioModal({
         <label>Fill mode</label>
         <select className="input" value={fillMode} onChange={(e) => setFillMode(e.target.value)}>
           <option value="realistic">Realistic</option>
-          <option value="instant">Instant</option>
+          <option value="idealized">Idealized</option>
         </select>
       </div>
       <div className="modal-actions">

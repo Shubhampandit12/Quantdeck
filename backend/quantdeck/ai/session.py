@@ -472,7 +472,7 @@ class AISessionManager:
     ) -> dict:
         """Dispatch a tool call, enforcing guardrails on ``place_order``."""
         if tool_name == "place_order":
-            block = self._check_order_guardrails(session, tool_args)
+            block = await self._check_order_guardrails(session, tool_args)
             if block is not None:
                 return {"error": f"blocked by guardrail: {block}", "guardrail": block}
             # Record the order timestamp for the rate limiter.
@@ -487,7 +487,7 @@ class AISessionManager:
             portfolio_id=session.portfolio_id,
         )
 
-    def _check_order_guardrails(
+    async def _check_order_guardrails(
         self, session: _Session, args: dict
     ) -> Optional[str]:
         """Return a rejection reason if an order violates guardrails, else None."""
@@ -501,10 +501,19 @@ class AISessionManager:
             if sym not in allowed_up:
                 return f"symbol {sym} not in allowed_symbols"
 
-        # max_order_notional (best-effort: qty * limit_price when available).
+        # max_order_notional. Prefer an explicit limit/stop price; for a MARKET
+        # order (the default type) neither is present, so fetch a live quote so
+        # the cap still binds — otherwise a large market order slips past it.
         max_notional = g.get("max_order_notional")
         if max_notional is not None:
             price = args.get("limit_price") or args.get("stop_price")
+            if price is None:
+                try:
+                    price = await self.market_data.get_price(
+                        str(args.get("symbol", ""))
+                    )
+                except Exception:  # noqa: BLE001 - no price: engine will re-check
+                    price = None
             if price is not None:
                 try:
                     notional = float(args.get("quantity", 0)) * float(price)

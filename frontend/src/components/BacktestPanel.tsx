@@ -37,7 +37,9 @@ def on_bar(ctx):
 `;
 
 const INTERVALS = ["1m", "5m", "15m", "1h", "4h", "1d", "1w"] as const;
-const FILL_MODES = ["next_open", "close", "mid"] as const;
+// Must match the backend FillMode enum (core/enums.py); the backtest engine
+// only treats "idealized" specially, everything else is "realistic".
+const FILL_MODES = ["idealized", "realistic"] as const;
 
 // Which strategy source to submit: inline code vs. a saved strategy.
 type SourceMode = "code" | "saved";
@@ -56,7 +58,7 @@ export default function BacktestPanel({ defaultSymbol }: Props) {
   const [leverage, setLeverage] = useState("1");
   const [commissionBps, setCommissionBps] = useState("5");
   const [slippageBps, setSlippageBps] = useState("2");
-  const [fillMode, setFillMode] = useState<string>("next_open");
+  const [fillMode, setFillMode] = useState<string>("realistic");
 
   const [sourceMode, setSourceMode] = useState<SourceMode>("code");
   const [code, setCode] = useState(DEFAULT_CODE);

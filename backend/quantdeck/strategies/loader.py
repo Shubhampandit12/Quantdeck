@@ -38,14 +38,20 @@ from .sdk import Strategy
 #: Top-level modules a strategy is allowed to import. Anything else is rejected.
 #: ``quantdeck.strategies`` is allowed so users can ``from quantdeck.strategies
 #: import Strategy``; nothing else under ``quantdeck`` is exposed.
+#: NOTE: ``numpy``/``pandas`` are deliberately NOT allowed. Even though importing
+#: them would pass the AST scan, their file-IO / (de)serialization surfaces are
+#: ordinary library calls the scanner never sees and the in-process allowlist
+#: cannot constrain: ``pd.read_pickle`` deserializes arbitrary pickles (arbitrary
+#: code execution via ``__reduce__``), and ``pd.read_csv`` / ``DataFrame.to_csv``
+#: / ``np.load`` / ``np.fromfile`` / ``ndarray.tofile`` grant arbitrary host
+#: filesystem read AND write — all bypassing restricted builtins entirely. The
+#: subprocess sandbox provides CPU/process isolation only (no filesystem
+#: isolation, especially on macOS), so it cannot backstop this either. Do not
+#: re-add these without real OS-level isolation (namespaces/seccomp/container).
 ALLOWED_IMPORTS: frozenset[str] = frozenset(
     {
         "math",
         "statistics",
-        "numpy",
-        "np",  # common alias target is fine; the module name is still numpy
-        "pandas",
-        "pd",
         "datetime",
         "collections",
         "random",

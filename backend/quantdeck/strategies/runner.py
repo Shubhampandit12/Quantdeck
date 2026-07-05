@@ -208,7 +208,9 @@ class StrategyManager:
         async with SessionLocal() as session:
             row = await session.get(StrategyORM, strategy_id)
             if row is None:
-                raise StrategyError(f"Strategy '{strategy_id}' not found")
+                # KeyError == "not found" so the route returns 404 (StrategyError
+                # would fall through to the 400 branch).
+                raise KeyError(strategy_id)
             if name is not None:
                 row.name = name
             if code is not None:
@@ -537,7 +539,9 @@ class StrategyManager:
         async with SessionLocal() as session:
             row = await session.get(StrategyORM, strategy_id)
         if row is None:
-            raise StrategyError(f"Strategy '{strategy_id}' not found")
+            # KeyError == "not found" so start/get/stop/delete routes return 404;
+            # they all catch KeyError before the StrategyError->400 branch.
+            raise KeyError(strategy_id)
         return row
 
     def _live_status(self, row: StrategyORM) -> StrategyStatus:

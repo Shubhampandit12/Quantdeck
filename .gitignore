@@ -9,3 +9,6 @@ data/*.db
 .env
 *.log
 .DS_Store
+
+# Workflow worktrees
+.claude/

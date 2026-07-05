@@ -484,15 +484,25 @@ class TradingEngine:
 
         notional = order.quantity * ref if ref else 0.0
 
+        # Notional caps only gate orders that ADD exposure. Reducing/closing a
+        # position frees exposure and must never be blocked (consistent with the
+        # buying-power and max-leverage checks below), or a user could be trapped
+        # in a position after the caps are tightened.
+        increases = self._increases_exposure(book, order)
+
         # Per-order notional cap.
-        if limits.max_order_notional is not None and notional > limits.max_order_notional:
+        if (
+            limits.max_order_notional is not None
+            and increases
+            and notional > limits.max_order_notional
+        ):
             return (
                 f"order notional {notional:.2f} exceeds max "
                 f"{limits.max_order_notional:.2f}"
             )
 
         # Per-symbol position notional cap (existing exposure + this order).
-        if limits.max_position_notional is not None and ref:
+        if limits.max_position_notional is not None and ref and increases:
             pos = book.positions.get(order.symbol)
             existing = pos.quantity * ref if pos and pos.side is not PositionSide.FLAT else 0.0
             # Only additive when the order increases exposure in the same side.
@@ -598,7 +608,15 @@ class TradingEngine:
         )
         result = accounting.apply_fill(prior_state, order.side, qty, exec_price)
 
-        realized_before = prior.realized_pnl if prior else 0.0
+        # Carry forward cumulative realized P&L only within the SAME open
+        # lifecycle. A FLAT prior is a retained stub from a closed round-trip;
+        # a fresh position opened from flat starts its own realized P&L at 0 so
+        # Position.realized_pnl reflects only this position's lifecycle.
+        realized_before = (
+            prior.realized_pnl
+            if prior is not None and prior.side is not PositionSide.FLAT
+            else 0.0
+        )
         new_position = Position(
             symbol=order.symbol,
             asset_class=order.asset_class,
@@ -758,7 +776,7 @@ class TradingEngine:
             book = self._book(portfolio_id)
             order = book.orders.get(order_id)
             if order is None:
-                raise PortfolioNotFound(f"order {order_id} not found")
+                raise KeyError(f"order {order_id} not found")
             if order.status in (OrderStatus.OPEN, OrderStatus.PENDING,
                                 OrderStatus.PARTIALLY_FILLED):
                 order.status = OrderStatus.CANCELLED
@@ -784,7 +802,7 @@ class TradingEngine:
             book = self._book(portfolio_id)
             order = book.orders.get(order_id)
             if order is None:
-                raise PortfolioNotFound(f"order {order_id} not found")
+                raise KeyError(f"order {order_id} not found")
             if order.status not in (OrderStatus.OPEN, OrderStatus.PENDING,
                                     OrderStatus.PARTIALLY_FILLED):
                 # Only working orders can be modified — return as-is otherwise.
