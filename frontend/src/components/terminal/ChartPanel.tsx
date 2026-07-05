@@ -85,6 +85,20 @@ export default function ChartPanel({ symbol, interval }: Props) {
       rightPriceScale: { borderColor: "#2a2e39" },
       timeScale: { borderColor: "#2a2e39", timeVisible: true, secondsVisible: false },
       crosshair: { mode: CrosshairMode.Normal },
+      // Explicitly enable all mouse-driven navigation so scroll-wheel zoom,
+      // drag-to-pan, and pinch all work (defaults can be surprising).
+      handleScroll: {
+        mouseWheel: true,
+        pressedMouseMove: true,
+        horzTouchDrag: true,
+        vertTouchDrag: true,
+      },
+      handleScale: {
+        mouseWheel: true,
+        pinch: true,
+        axisPressedMouseMove: true,
+        axisDoubleClickReset: true,
+      },
     });
     const s = c.addCandlestickSeries({
       upColor: "#26a69a",
@@ -98,6 +112,8 @@ export default function ChartPanel({ symbol, interval }: Props) {
     seriesRef.current = s;
     setChart(c);
     setSeries(s);
+    // Expose the chart for e2e verification / debugging (harmless).
+    (window as unknown as { __qdChart?: IChartApi }).__qdChart = c;
     return () => {
       c.remove();
       chartRef.current = null;

@@ -371,12 +371,20 @@ export default function DrawingLayer({ chart, series, symbol, containerRef }: Dr
         onPointerUp={onPointerUp}
         onDoubleClick={onDoubleClick}
       >
-        {/* Persisted drawings */}
+        {/* Persisted drawings. Each is wrapped in `.qd-hit` so that, in cursor
+            mode (where the SVG itself is pointer-events:none to let the chart
+            zoom/pan), the painted shape remains a pointer target and stays
+            selectable/draggable. pointer-events is an inherited property, so the
+            wrapper's value propagates to the shape's lines/rects. */}
         {ctxConv &&
           drawings.map((d) => {
             const rc = renderCtx(d.id === selectedId);
             if (!rc) return null;
-            return <g key={d.id}>{renderDrawing(d, rc)}</g>;
+            return (
+              <g key={d.id} className="qd-hit">
+                {renderDrawing(d, rc)}
+              </g>
+            );
           })}
 
         {/* Live draft preview */}

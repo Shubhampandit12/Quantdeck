@@ -30,15 +30,23 @@ never bypass it, and it can never touch real money.
    curl -s http://localhost:8000/api/health | python -m json.tool   # default_portfolio_id
    ```
 
-3. **Register the server** with your MCP client. For Claude Desktop, add to
-   `claude_desktop_config.json`:
+3. **Register the server** with your MCP client. The easiest way to get the
+   exact config (with your portfolio id and venv path filled in) is:
+
+   ```bash
+   ./scripts/run_mcp.sh      # prints the config, then serves on stdio
+   ```
+
+   For Claude Desktop, paste that into `claude_desktop_config.json`. It looks
+   like this — **use the venv's python** so the `quantdeck` package resolves
+   without any `PYTHONPATH` setup:
 
    ```json
    {
      "mcpServers": {
        "quantdeck": {
-         "command": "python",
-         "args": ["-m", "quantdeck.mcp_server.server"],
+         "command": "/ABSOLUTE/PATH/TO/QuantDeck/backend/.venv/bin/python",
+         "args": ["-m", "quantdeck.mcp_server"],
          "env": {
            "QUANTDECK_API_URL": "http://localhost:8000",
            "QUANTDECK_PORTFOLIO_ID": "<your-portfolio-id>"
@@ -48,8 +56,10 @@ never bypass it, and it can never touch real money.
    }
    ```
 
-   Run it from the `backend/` directory (or ensure the `quantdeck` package is on
-   `PYTHONPATH`, e.g. point `command` at `backend/.venv/bin/python`).
+   Then fully restart Claude Desktop. You'll see a "quantdeck" tool group with
+   12 tools. Verified working end-to-end: an MCP client can list the tools, pull
+   live quotes, and place paper orders that flow through the same risk-checked
+   engine as the UI.
 
 4. **Talk to the AI.** Give it your strategy, e.g.:
 

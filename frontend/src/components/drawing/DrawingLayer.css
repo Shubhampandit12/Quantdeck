@@ -4,19 +4,34 @@
   position: absolute;
   inset: 0;
   z-index: 3;
+  /* The container itself never intercepts events — only the SVG (in drawing
+     mode) or individual drawn shapes (in cursor mode) do. This lets wheel-zoom
+     and drag-pan reach the chart canvas underneath. */
+  pointer-events: none;
 }
 
-/* In cursor mode the layer must let chart interactions (pan/zoom/crosshair)
-   through EXCEPT where we hit a drawing; simplest robust approach: keep the SVG
-   interactive only in drawing mode, and in cursor mode allow pointer events so
-   we can select/drag. We still forward wheel/pan by not preventing default. */
+/* The overlay must let the chart zoom/pan/crosshair work normally while still
+   supporting drawing + selecting shapes. Strategy:
+     - DRAWING mode (a tool is picked): the SVG captures ALL pointer events so a
+       click-drag creates a shape (cursor: crosshair).
+     - CURSOR mode: the SVG surface is transparent to pointer events
+       (pointer-events:none) so wheel-zoom and drag-pan reach the chart canvas
+       underneath. Individual drawn shapes re-enable pointer-events on their own
+       elements (see .qd-hit below) so they stay selectable/draggable. */
 .qd-drawlayer.is-cursor .qd-drawlayer__svg {
-  pointer-events: auto;
+  pointer-events: none;
   cursor: default;
 }
 .qd-drawlayer.is-drawing .qd-drawlayer__svg {
   pointer-events: auto;
   cursor: crosshair;
+}
+
+/* In cursor mode, only the drawn shapes themselves receive events (so they can
+   be selected/dragged) while empty space stays transparent to the chart. */
+.qd-drawlayer.is-cursor .qd-drawlayer__svg .qd-hit,
+.qd-drawlayer.is-cursor .qd-drawlayer__svg .qd-handle {
+  pointer-events: all;
 }
 
 .qd-drawlayer__svg {
@@ -28,6 +43,12 @@
 /* Selection handles get a subtle glow. */
 .qd-drawlayer__svg .qd-handle {
   cursor: grab;
+}
+
+/* Interactive children must re-enable events (their parent is pointer-events:none). */
+.qd-drawlayer__textedit,
+.qd-drawpopover {
+  pointer-events: auto;
 }
 
 /* Inline text editor floating over the chart. */

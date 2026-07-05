@@ -1,6 +1,7 @@
 // TopBar — full-width terminal header: search, asset filter, timeframe, portfolio
 // switcher (+ New / Reset), leverage editor, balance/equity, connection dot, PAPER badge.
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import "./TopBar.css";
 import { api, ApiError } from "../../api/client";
 import { useStore } from "../../state/store";
@@ -62,9 +63,9 @@ export default function TopBar({ timeframe, onTimeframe, onSelectSymbol, connect
 
   return (
     <header className="topbar">
-      <div className="topbar-logo">
+      <Link className="topbar-logo" to="/" title="Back to home">
         Quant<span>Deck</span>
-      </div>
+      </Link>
 
       <div className="topbar-sep" />
 

@@ -22,8 +22,8 @@ Ready-to-paste client config (e.g. Claude Desktop ``claude_desktop_config.json``
     {
       "mcpServers": {
         "quantdeck": {
-          "command": "python",
-          "args": ["-m", "quantdeck.mcp_server.server"],
+          "command": "/abs/path/to/backend/.venv/bin/python",
+          "args": ["-m", "quantdeck.mcp_server"],
           "env": {
             "QUANTDECK_API_URL": "http://localhost:8000",
             "QUANTDECK_PORTFOLIO_ID": "<your-portfolio-id>"

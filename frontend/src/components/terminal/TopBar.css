@@ -17,6 +17,11 @@
   letter-spacing: 0.02em;
   color: var(--text-0);
   padding-right: 4px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.topbar-logo:hover {
+  opacity: 0.85;
 }
 .topbar-logo span {
   color: var(--accent);
