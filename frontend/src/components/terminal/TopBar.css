@@ -33,11 +33,7 @@
   opacity: 0.9;
 }
 .topbar-logo span {
-  background: var(--accent-grad);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
+  color: var(--accent-hover);
 }
 
 .topbar-sep {

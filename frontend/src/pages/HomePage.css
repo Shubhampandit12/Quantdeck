@@ -50,10 +50,7 @@
   box-shadow: 0 6px 18px rgba(79, 134, 255, 0.35);
 }
 .home-logo .logo-accent {
-  background: var(--accent-grad);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--accent-hover);
 }
 
 .home-nav-links {
@@ -265,10 +262,7 @@
   margin: 0 0 var(--sp-5);
 }
 .hero-title .grad {
-  background: var(--accent-grad);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--accent-hover);
 }
 .hero-sub {
   font-size: 18px;

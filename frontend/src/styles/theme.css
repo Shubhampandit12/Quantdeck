@@ -1,6 +1,5 @@
 /* QuantDeck dark theme — TradingView-inspired palette + design tokens.
    Every component uses these CSS variables so the look stays consistent. */
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 
 :root {
   /* Palette — deep, slightly blue-tinted neutrals for a premium dark feel.
@@ -28,8 +27,8 @@
   --down-bg: rgba(240, 97, 109, 0.14);
   --warn: #f5b23d;
 
-  --font-sans: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Helvetica, Arial, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
   /* Monospace is reserved for code editors and numeric/tabular data only —
      never for prose like the AI reasoning trace. */
   --font-mono: "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
@@ -73,7 +72,6 @@ body {
   font-family: var(--font-sans);
   font-size: 14px;
   line-height: 1.5;
-  letter-spacing: 0.01em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
