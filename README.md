@@ -1,146 +1,169 @@
-# QuantDeck — AI-Driven Paper Trading Platform
+# QuantDeck
 
-A TradingView-style, **demo-money-only** trading platform with deep support for
-**AI-driven** and **code-driven** trading. Watch live crypto and US-stock markets
-on rich charts, hand an AI a plain-English strategy and let it trade your paper
-account via MCP, ask the AI for one-off manual trades, or inject your own Python
-strategy to backtest and run live.
+A paper-trading terminal for testing trading ideas — by hand, by AI, or by
+code — against live crypto and US-equity markets, with none of it touching
+real money.
 
 ![Home page](docs/screenshots/home.png)
 ![Trading terminal](docs/screenshots/terminal-with-position.png)
 
-> **No real money, ever.** There is no brokerage integration and no code path,
-> config flag, or credential that can route an order to a real exchange. The only
-> external credentials used are *read-only* market-data keys and an optional
-> Anthropic API key for the AI features. Every balance, order, and P&L is
-> simulated.
+There is no brokerage or exchange integration anywhere in the codebase, and
+no config flag that adds one. The only external credentials it ever uses are
+read-only market-data keys and an optional Anthropic key for the AI features.
+Every balance, fill, and P&L number is simulated.
 
----
+## 1. What it does
 
-## What it does
+You can watch live crypto (Binance) and the full S&P 500 on a candlestick
+chart with a real drawing-tool set (trend lines, Fibonacci, channels, long/
+short markers), then act on what you see three ways: place an order by hand,
+type a plain-English instruction ("buy 10 AAPL") for an AI to translate into
+an order, or write a Python strategy that trades on its own — live or
+backtested against history. Positions carry leverage, margin, and liquidation
+math, not just a flat cash balance.
 
-- **Two asset classes:** Crypto (Binance, real-time) and US equities incl. the
-  full **S&P 500** (real-time via Alpaca/Finnhub if keyed, else 15-min delayed
-  via Yahoo). Data is always labeled with its source and delay — never fabricated.
-- **Paper-trading engine:** market / limit / stop / stop-limit / bracket orders,
-  long & short, realized/unrealized P&L, **customizable starting balance**, and
-  **leverage** with margin, buying-power, margin-call and liquidation simulation.
-- **AI auto-trading via MCP:** an MCP server exposes the whole trading surface so
-  Claude (Desktop / Code / any MCP client) can trade your paper account from your
-  strategy prompt.
-- **AI manual trading:** natural-language one-off orders ("buy 10 AAPL").
-- **Code-injected strategies:** write a Python `Strategy`, run it live in a
-  **sandbox**, or backtest the identical file.
-- **Backtesting:** replays history through the same engine; report leads with
-  **total profit/loss in $ and %**, plus equity curve, drawdown, Sharpe, win
-  rate, and a trade log.
-- **TradingView-style UI:** a home/landing page and a full terminal — live
-  candlestick chart, watchlist, order ticket with leverage, portfolio/positions,
-  and the **complete drawing-tools set** (trend lines, rays, Fibonacci, shapes,
-  measures, long/short tools, text…). Chart indicators are intentionally out of
-  scope.
+## 2. One engine, one risk path
 
-## Architecture
+Every order — whether it came from the UI, from the AI chat, from an MCP
+client, or from a running strategy — goes through the same
+`TradingEngine.place_order()` call and the same validation (symbol
+allowlist, notional caps, buying power, max leverage, daily-loss breaker).
+This isn't a convention teams are expected to follow; the engine is behind a
+frozen `Protocol` interface, so nothing downstream can quietly get a
+private, less-checked path to the order book.
 
 ```
-market data  ─►  simulation engine  ─►  ┌─ REST + WebSocket API ─► React SPA
-(Binance/Yahoo/   (orders, fills,        ├─ MCP server ─► Claude / MCP clients
- Finnhub/Alpaca)   positions, P&L,       └─ strategy runtime (sandbox) + backtester
-                   leverage/margin,
-                   shared risk checks)
+market data ──► TradingEngine ──┬─► REST + WebSocket API ──► React terminal
+(Binance/Yahoo/    (orders,     ├─► MCP server ──► Claude Desktop / Code
+ Finnhub/Alpaca)   fills,       └─► strategy sandbox ──► backtester
+                   positions,
+                   margin)
 ```
 
-The engine is the single source of truth. The API, the MCP tools, and user
-strategies are three clients of the *same* engine and the *same* risk-check path.
+Backend is Python 3.12 on FastAPI (fully async), SQLAlchemy over SQLite
+(swaps to Postgres by changing the connection string, no code changes), plus
+`httpx`, `websockets`, `yfinance`, `anthropic`, and `mcp`. Frontend is React
+18 + TypeScript + Vite, charted with `lightweight-charts`, state in
+`zustand`. Module map, REST/WS contract, and strategy authoring docs live in
+`docs/` (`SPINE.md`, `API_CONTRACT.md`, `FRONTEND_SPEC.md`, `STRATEGIES.md`,
+`MCP.md`).
 
-- Backend: **Python 3.12 + FastAPI** (async), SQLAlchemy + SQLite, `httpx`,
-  `websockets`, `yfinance`, `anthropic`, `mcp`.
-- Frontend: **React 18 + TypeScript + Vite + lightweight-charts + zustand**.
+## 3. Market data: routed by asset class, never invented
 
-See `docs/SPINE.md` (module map), `docs/API_CONTRACT.md` (REST/WS contract),
-`docs/FRONTEND_SPEC.md`, and `docs/STRATEGIES.md` (how to write strategies).
+Crypto always goes to Binance's public API — keyless, real-time, no rate
+limit worth worrying about. US equities try Finnhub or Alpaca first if you've
+set keys for them, and fall back to Yahoo (15-minute delayed) if not. Every
+quote carries its own `source` and `delay` label rather than presenting
+everything as equally fresh.
 
----
+If every provider fails, the service serves the last cached price rather
+than fabricate one — and if there's no cache either, it returns an honest
+error instead of a zero or a stale-looking success. That matters more than
+it sounds: one deployment gotcha we hit directly is that Binance.com
+geo-blocks requests from US IP ranges, which includes most Render/AWS/GCP
+regions by default. Deploy this in a US region and crypto data goes
+completely dark while equities (Yahoo isn't geo-restricted) keep working
+fine — the app tells you honestly via a 503, it doesn't paper over it. The
+fix is picking a non-US hosting region.
 
-## Deploy / host it
+## 4. The strategy sandbox, and why NumPy and pandas are banned
 
-QuantDeck ships as a single Docker image (backend serves the built frontend on
-one origin). Easiest host is **Render** — push to GitHub, then New + →
-Blueprint → pick the repo (it reads `render.yaml`). Or run the image anywhere:
+A user strategy is untrusted code by default, so it's checked twice before it
+can trade. First, a static AST pass rejects dangerous imports (`os`,
+`subprocess`, `socket`, `pickle`, ...) and any attempt to reach for dunder
+attributes like `__globals__` or `__subclasses__` — the standard levers for
+escaping a Python sandbox. Second, live strategies additionally run in a
+separate subprocess with OS-level CPU and memory limits, talking to the
+parent process only through a JSON line protocol; the child never has a
+handle to the real engine, only "I want to buy" style intents that the
+parent validates and executes.
 
-```bash
-docker build -t quantdeck . && docker run -p 8000:8000 quantdeck
+NumPy and pandas are both backend dependencies (`yfinance` uses them) but
+they are deliberately kept off the strategy import allowlist, even though
+importing them would pass the AST scan cleanly. The reason: `pd.read_pickle`
+deserializes arbitrary pickles, which is arbitrary code execution via
+`__reduce__`, and `pd.read_csv` / `np.load` / `ndarray.tofile` grant
+arbitrary host filesystem read and write — none of that touches any of the
+constructs the scanner or the restricted builtins are watching for, and the
+subprocess sandbox only isolates CPU/memory, not the filesystem. Rather than
+pretend that's covered, the two libraries stay out entirely until real OS
+containment (namespaces, seccomp, a container) is in place.
+
+## 5. AI trading and MCP
+
+With an `ANTHROPIC_API_KEY` set, the terminal's AI panel takes a plain-
+English strategy brief plus guardrails — allowed symbols, max order size, max
+orders per minute, max daily loss — and trades autonomously, streaming its
+reasoning and every tool call live. Those guardrails are checked in the AI
+dispatch layer *before* an order is even built, on top of the engine's own
+checks — belt and suspenders rather than trusting one gate. `stop()` is
+always a kill switch: it halts the session and flattens every open position.
+
+The same 12-tool schema (quotes, OHLCV, portfolio/orders/history,
+place/cancel/modify order, backtest, market summary) backs both that in-app
+AI and a standalone MCP server, so Claude Desktop or Claude Code can trade a
+paper account too — over HTTP calls to the same running API, which means an
+external MCP client is just as bound by the shared risk path as everything
+else. Without a key, none of this errors out; the API returns an honest
+"AI disabled" response and the rest of the app works normally.
+
+On the public Render deploy this is left off on purpose: there's no login on
+that URL, so a live `ANTHROPIC_API_KEY` would let anyone burn your API
+credits. See `docs/DEPLOY.md` for the reasoning and how to turn it on safely
+if you add auth.
+
+## 6. Tests
+
+```
+$ cd backend && pytest -q
+37 passed in 15.24s
 ```
 
-Full instructions, plans, and the AI-key/auth caveat: **[docs/DEPLOY.md](docs/DEPLOY.md)**.
+The suite runs against a deterministic fake market-data provider, so there's
+no network I/O and no flakiness. Coverage: position/P&L/margin/liquidation
+math in isolation (`test_accounting.py`), order flow through the engine —
+limits, shorts, leverage, rejections, bracket TP/SL, flatten-all
+(`test_engine.py`), the three example strategies replayed end-to-end through
+the backtester (`test_backtest.py`), and symbol classification / S&P 500
+loading (`test_marketdata_offline.py`). There's no frontend test suite yet —
+UI correctness right now rests on manual testing in a real browser, not
+automation.
 
----
-
-## Quick start — one command (local dev)
+## 7. Running it
 
 ```bash
 ./start.sh
 ```
 
-That's it. This single command:
-- on first run, creates the Python venv, installs backend deps, and runs
-  `npm install`;
-- starts the **backend API** (http://localhost:8000) and the **frontend**
-  (http://localhost:5173) together;
-- waits for the backend to be healthy before opening the UI;
-- stops **both** cleanly when you press **Ctrl+C**.
+First run creates the backend venv, installs Python and npm dependencies,
+then starts the API on `:8000` and the frontend on `:5173` together, waiting
+for the backend health check before opening the UI. Ctrl+C stops both. Ports
+are configurable (`QUANTDECK_PORT=9000 FRONTEND_PORT=5000 ./start.sh`).
 
-Then open **http://localhost:5173** — the home page opens into the terminal.
-
-Ports are configurable: `QUANTDECK_PORT=9000 FRONTEND_PORT=5000 ./start.sh`.
-
-Runs fully offline for crypto (Binance is public). US-equity real-time needs a
-free Finnhub/Alpaca key; otherwise it falls back to Yahoo (15-min delayed). Add
-`ANTHROPIC_API_KEY` to `backend/.env` to enable the AI features.
+Crypto works out of the box (Binance needs no key). For real-time US-equity
+data, add a free Finnhub or Alpaca key to `backend/.env`; otherwise it falls
+back to delayed Yahoo data automatically. Add `ANTHROPIC_API_KEY` to enable
+the AI features.
 
 <details>
-<summary>Prefer to run the two services separately?</summary>
+<summary>Run the two services separately</summary>
 
 ```bash
 ./scripts/run_backend.sh     # API on :8000
-./scripts/run_frontend.sh    # UI on :5173 (in another terminal)
+./scripts/run_frontend.sh    # UI on :5173, in another terminal
 ```
 </details>
 
-### Run the tests
+### Deploying
 
-```bash
-cd backend && source .venv/bin/activate && pytest -q
-```
+Ships as a single Docker image — the backend serves the built frontend from
+one origin, so there's no CORS to configure. Easiest path is Render (push to
+GitHub, then Blueprint → this repo, it reads `render.yaml`); the image also
+runs anywhere that takes a `$PORT`-bound container (Fly.io, Railway, a VPS).
+Full instructions, plan tradeoffs, and the region/AI-key caveats above are in
+`docs/DEPLOY.md`.
 
----
-
-## AI trading
-
-The AI features activate when an Anthropic API key is present (set
-`ANTHROPIC_API_KEY` in the environment or `QUANTDECK_ANTHROPIC_API_KEY` in
-`backend/.env`). Without a key, the UI still renders and the API returns an
-honest "AI disabled" response.
-
-- **In-app:** the terminal's *AI Session* panel takes a plain-English strategy
-  prompt + guardrails (allowed symbols, max order size, order rate, max daily
-  loss) and trades autonomously, streaming its reasoning and every tool call.
-  A kill-switch / flatten-all is always available. The command bar does one-off
-  NL orders.
-- **Via MCP (Claude Desktop / Code):** see `docs/MCP.md`. Start the API, then
-  register the MCP server; Claude can then call `place_order`, `get_quote`,
-  `run_backtest`, etc. against your paper account.
-
-## Safety model
-
-1. No brokerage/exchange order APIs exist in the codebase — only market-data reads.
-2. Injected strategy code is AST-scanned and executed in a resource-limited
-   subprocess sandbox with no filesystem/network access beyond the `ctx` API.
-3. Data is labeled with source + delay; unavailable data is shown honestly,
-   never fabricated.
-4. All orders — UI, AI, or strategy — pass the same validation + risk checks.
-
-## Project layout
+## 8. Project layout
 
 ```
 backend/
@@ -162,5 +185,5 @@ frontend/
     pages/        HomePage, TerminalPage, StrategiesPage, BacktestPage
     components/   terminal/*, drawing/*, StrategyManager, BacktestPanel, AISessionPanel
     state/        zustand store
-docs/             SPINE, API_CONTRACT, FRONTEND_SPEC, STRATEGIES, MCP
+docs/             SPINE, API_CONTRACT, FRONTEND_SPEC, STRATEGIES, MCP, DEPLOY
 ```
