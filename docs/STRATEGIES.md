@@ -13,7 +13,7 @@ class MyStrategy(Strategy):
     name = "My Strategy"
 
     def on_start(self, ctx):
-        self.symbol = str(ctx.param("symbol", "BTC/USDT"))
+        self.symbol = str(ctx.param("symbol", "AAPL"))
         self.fast = int(ctx.param("fast", 10))
         self.slow = int(ctx.param("slow", 30))
         ctx.subscribe([self.symbol])

@@ -23,7 +23,7 @@ export const useStore = create<AppState>((set, get) => ({
   portfolios: [],
   activePortfolioId: null,
   snapshot: null,
-  selectedSymbol: "BTC/USDT",
+  selectedSymbol: "AAPL",
   quotes: {},
 
   loadPortfolios: async () => {

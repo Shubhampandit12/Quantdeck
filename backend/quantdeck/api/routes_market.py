@@ -5,9 +5,8 @@ already normalizes providers into canonical `Quote` / `OHLCVResponse` /
 `SymbolInfo` shapes, so these handlers mostly parse query params and translate
 `DataUnavailableError` into an honest HTTP 503 — we NEVER fabricate a price.
 
-Symbols travel in the path with the `:path` converter so crypto pairs like
-`BTC/USDT` survive without needing URL-encoding, and encoded forms
-(`BTC%2FUSDT`) are decoded by Starlette before we see them.
+Symbols travel in the path with the `:path` converter so ticker symbols
+survive without needing URL-encoding.
 """
 from __future__ import annotations
 
@@ -117,7 +116,7 @@ async def get_ohlcv(
 
 @router.get("/market/summary")
 async def market_summary() -> dict:
-    """Dashboard summary: top movers plus a slice of crypto and stocks.
+    """Dashboard summary: top movers plus a slice of stocks.
 
     Delegates to the service if it exposes a `get_market_summary()`; otherwise
     builds a best-effort summary from a handful of well-known symbols. Any
@@ -134,7 +133,6 @@ async def market_summary() -> dict:
 
     # Fallback: assemble from a small representative watchlist.
     stock_syms = ["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META", "TSLA"]
-    crypto_syms = ["BTC/USDT", "ETH/USDT", "SOL/USDT", "BNB/USDT"]
 
     async def _collect(syms: list[str]) -> list[Quote]:
         quotes: list[Quote] = []
@@ -146,10 +144,9 @@ async def market_summary() -> dict:
         return quotes
 
     stocks = await _collect(stock_syms)
-    crypto = await _collect(crypto_syms)
 
     ranked = sorted(
-        [q for q in (stocks + crypto) if q.change_percent is not None],
+        [q for q in stocks if q.change_percent is not None],
         key=lambda q: q.change_percent or 0.0,
     )
     movers_down = ranked[:5]
@@ -158,6 +155,5 @@ async def market_summary() -> dict:
     return {
         "movers_up": [q.model_dump() for q in movers_up],
         "movers_down": [q.model_dump() for q in movers_down],
-        "crypto": [q.model_dump() for q in crypto],
         "stocks": [q.model_dump() for q in stocks],
     }

@@ -1,11 +1,11 @@
-// TopBar — full-width terminal header: search, asset filter, timeframe, portfolio
+// TopBar — full-width terminal header: search, timeframe, portfolio
 // switcher (+ New / Reset), leverage editor, balance/equity, connection dot, PAPER badge.
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "./TopBar.css";
 import { api, ApiError } from "../../api/client";
 import { useStore } from "../../state/store";
-import type { AssetClass, SymbolInfo } from "../../api/types";
+import type { SymbolInfo } from "../../api/types";
 import { fmtUsd, signClass, fmtSigned } from "../../lib/format";
 import type { Timeframe } from "../../pages/TerminalPage";
 
@@ -26,7 +26,6 @@ export default function TopBar({ timeframe, onTimeframe, onSelectSymbol, connect
   const loadPortfolios = useStore((s) => s.loadPortfolios);
   const refreshSnapshot = useStore((s) => s.refreshSnapshot);
 
-  const [assetFilter, setAssetFilter] = useState<AssetClass>("crypto");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SymbolInfo[]>([]);
   const [showResults, setShowResults] = useState(false);
@@ -37,7 +36,7 @@ export default function TopBar({ timeframe, onTimeframe, onSelectSymbol, connect
 
   const pf = snapshot?.portfolio;
 
-  // Debounced symbol search filtered by the active asset class.
+  // Debounced symbol search.
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (!query.trim()) {
@@ -48,12 +47,12 @@ export default function TopBar({ timeframe, onTimeframe, onSelectSymbol, connect
     searchTimer.current = setTimeout(async () => {
       try {
         const r = await api.search(query.trim(), 20);
-        setResults(r.filter((s) => s.asset_class === assetFilter));
+        setResults(r);
       } catch {
         setResults([]);
       }
     }, 200);
-  }, [query, assetFilter]);
+  }, [query]);
 
   function pick(sym: string) {
     onSelectSymbol(sym);
@@ -93,22 +92,6 @@ export default function TopBar({ timeframe, onTimeframe, onSelectSymbol, connect
             ))}
           </div>
         )}
-      </div>
-
-      {/* asset-class filter */}
-      <div className="pill-group">
-        <button
-          className={assetFilter === "us_equity" ? "active" : ""}
-          onClick={() => setAssetFilter("us_equity")}
-        >
-          US Stocks
-        </button>
-        <button
-          className={assetFilter === "crypto" ? "active" : ""}
-          onClick={() => setAssetFilter("crypto")}
-        >
-          Crypto
-        </button>
       </div>
 
       {/* timeframe selector */}

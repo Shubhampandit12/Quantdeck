@@ -57,7 +57,7 @@ export default function StrategyManager({ portfolioId }: { portfolioId: string }
   const [error, setError] = useState<string | null>(null);
 
   // Run controls
-  const [symbolsInput, setSymbolsInput] = useState("BTC/USDT");
+  const [symbolsInput, setSymbolsInput] = useState("AAPL");
   const [interval, setIntervalStr] = useState("1h");
 
   const logRef = useRef<HTMLDivElement>(null);
@@ -322,7 +322,7 @@ export default function StrategyManager({ portfolioId }: { portfolioId: string }
             <input
               className="input"
               value={symbolsInput}
-              placeholder="BTC/USDT, ETH/USDT"
+              placeholder="AAPL, MSFT"
               onChange={(e) => setSymbolsInput(e.target.value)}
               disabled={running}
             />

@@ -14,7 +14,7 @@ See `frontend/src/api/types.ts` for the TypeScript mirror of every shape below,
 and `backend/quantdeck/core/models.py` for the Pydantic source of truth. Enum
 string values are exactly as in `core/enums.py`.
 
-- `AssetClass`: `"us_equity" | "crypto"`
+- `AssetClass`: `"us_equity"`
 - `OrderSide`: `"buy" | "sell"`
 - `OrderType`: `"market" | "limit" | "stop" | "stop_limit"`
 - `OrderStatus`: `"pending" | "open" | "partially_filled" | "filled" | "cancelled" | "rejected" | "expired"`
@@ -23,12 +23,12 @@ string values are exactly as in `core/enums.py`.
 
 ## Market data
 
-- `GET /api/symbols?asset_class=us_equity|crypto` → `SymbolInfo[]`
+- `GET /api/symbols?asset_class=us_equity` → `SymbolInfo[]`
 - `GET /api/search?q=<query>&limit=25` → `SymbolInfo[]`
-- `GET /api/quote/{symbol}` → `Quote`  (symbol may be URL-encoded, e.g. `BTC%2FUSDT`)
-- `GET /api/quotes?symbols=AAPL,MSFT,BTC/USDT` → `Quote[]`
+- `GET /api/quote/{symbol}` → `Quote`
+- `GET /api/quotes?symbols=AAPL,MSFT,NVDA` → `Quote[]`
 - `GET /api/ohlcv/{symbol}?interval=1d&limit=500&start=&end=` → `OHLCVResponse`
-- `GET /api/market/summary` → `{ movers_up: Quote[], movers_down: Quote[], crypto: Quote[], stocks: Quote[] }`
+- `GET /api/market/summary` → `{ movers_up: Quote[], movers_down: Quote[], stocks: Quote[] }`
 
 ## Portfolios
 
@@ -84,7 +84,7 @@ string values are exactly as in `core/enums.py`.
 
 ## WebSockets
 
-- `WS /ws/market?symbols=AAPL,BTC/USDT` → streams `{ type:"quote", data: Quote }` frames.
+- `WS /ws/market?symbols=AAPL,MSFT` → streams `{ type:"quote", data: Quote }` frames.
   Client may send `{ "action":"subscribe"|"unsubscribe", "symbols":[...] }` to change subscriptions.
 - `WS /ws/events?portfolio_id=<id>` → streams `Event` frames `{ type, portfolio_id, timestamp, data }`
   for order/position/portfolio/margin/liquidation updates, plus `strategy_log`,

@@ -34,11 +34,11 @@ def utcnow() -> datetime:
 class SymbolInfo(BaseModel):
     """A tradable instrument."""
 
-    symbol: str                       # canonical symbol, e.g. "AAPL" or "BTC/USDT"
+    symbol: str                       # canonical symbol, e.g. "AAPL"
     name: str = ""
     asset_class: AssetClass
     exchange: str = ""
-    # Provider-native symbol (e.g. "BTCUSDT" for Binance) if it differs.
+    # Provider-native symbol, if it differs from the canonical one.
     provider_symbol: str = ""
     tradable: bool = True
 

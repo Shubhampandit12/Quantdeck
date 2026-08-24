@@ -63,7 +63,7 @@ never bypass it, and it can never touch real money.
 
 4. **Talk to the AI.** Give it your strategy, e.g.:
 
-   > "Using QuantDeck, trade BTC/USDT and ETH/USDT. Go long when the 20-period
+   > "Using QuantDeck, trade AAPL and MSFT. Go long when the 20-period
    > RSI on the 15m chart drops below 30, exit at RSI 55 or a 3% stop. Never risk
    > more than 2% of the portfolio per trade. Show me each order."
 

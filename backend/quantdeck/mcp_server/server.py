@@ -98,8 +98,8 @@ async def _dispatch_over_rest(
 
     # ---- Market data (no portfolio needed) ------------------------------- #
     if name == "get_quote":
-        # Fully encode the symbol so crypto pairs ("BTC/USDT") stay one path
-        # segment ("/api/quote/BTC%2FUSDT") per the API contract.
+        # Fully encode the symbol so it stays one path segment per the API
+        # contract (e.g. "/api/quote/AAPL").
         sym = quote(str(args["symbol"]), safe="")
         return await _call_api(client, "GET", f"/api/quote/{sym}")
 

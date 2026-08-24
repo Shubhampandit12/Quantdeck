@@ -156,12 +156,12 @@ async def test_insufficient_buying_power_returns_rejected(engine_obj):
         name="Tiny", starting_balance=1_000.0,
         leverage=1.0, fill_mode="idealized",
     )
-    # 100 BTC @ 40k = $4M notional on a $1k account. A LIMIT order carries an
-    # explicit reference price so the shared buying-power check can size it and
-    # reject before it ever rests. (A market order with no cached price cannot
-    # be pre-sized; this test targets the deterministic sizing path.)
-    req = OrderRequest(symbol="BTC/USDT", side=OrderSide.BUY,
-                       type=OrderType.LIMIT, quantity=100.0, limit_price=40_000.0)
+    # 100,000 NVDA @ 120 = $12M notional on a $1k account. A LIMIT order carries
+    # an explicit reference price so the shared buying-power check can size it
+    # and reject before it ever rests. (A market order with no cached price
+    # cannot be pre-sized; this test targets the deterministic sizing path.)
+    req = OrderRequest(symbol="NVDA", side=OrderSide.BUY,
+                       type=OrderType.LIMIT, quantity=100_000.0, limit_price=120.0)
     order = await engine_obj.place_order(pf.id, req)
 
     assert order.status == OrderStatus.REJECTED

@@ -19,7 +19,7 @@ VALID_INTERVALS = ("1m", "5m", "15m", "30m", "1h", "4h", "1d", "1w")
 
 
 class MarketDataProvider(abc.ABC):
-    """A single data source (Binance, Yahoo, Finnhub, Alpaca, ...)."""
+    """A single data source (Yahoo, Finnhub, Alpaca, ...)."""
 
     name: str = "provider"
     asset_classes: tuple[AssetClass, ...] = ()

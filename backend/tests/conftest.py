@@ -102,8 +102,8 @@ class FakeMarketData:
         self._prices: dict[str, float] = {
             "AAPL": 150.0,
             "MSFT": 300.0,
-            "BTC/USDT": 40_000.0,
-            "ETH/USDT": 2_000.0,
+            "NVDA": 120.0,
+            "GOOGL": 140.0,
         }
         if base_prices:
             self._prices.update({_symbols.normalize_symbol(k): v
@@ -131,12 +131,10 @@ class FakeMarketData:
                        asset_class=AssetClass.US_EQUITY, exchange="NASDAQ"),
             SymbolInfo(symbol="MSFT", name="Microsoft Corp.",
                        asset_class=AssetClass.US_EQUITY, exchange="NASDAQ"),
-            SymbolInfo(symbol="BTC/USDT", name="Bitcoin",
-                       asset_class=AssetClass.CRYPTO, exchange="BINANCE",
-                       provider_symbol="BTCUSDT"),
-            SymbolInfo(symbol="ETH/USDT", name="Ethereum",
-                       asset_class=AssetClass.CRYPTO, exchange="BINANCE",
-                       provider_symbol="ETHUSDT"),
+            SymbolInfo(symbol="NVDA", name="NVIDIA Corp.",
+                       asset_class=AssetClass.US_EQUITY, exchange="NASDAQ"),
+            SymbolInfo(symbol="GOOGL", name="Alphabet Inc.",
+                       asset_class=AssetClass.US_EQUITY, exchange="NASDAQ"),
         ]
 
     def _base_price(self, symbol: str) -> float:

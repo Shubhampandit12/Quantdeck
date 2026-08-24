@@ -1,8 +1,7 @@
 # QuantDeck
 
 A paper-trading terminal for testing trading ideas — by hand, by AI, or by
-code — against live crypto and US-equity markets, with none of it touching
-real money.
+code — against live US-equity markets, with none of it touching real money.
 
 ![Home page](docs/screenshots/home.png)
 ![Trading terminal](docs/screenshots/terminal-with-position.png)
@@ -14,9 +13,9 @@ Every balance, fill, and P&L number is simulated.
 
 ## 1. What it does
 
-You can watch live crypto (Binance) and the full S&P 500 on a candlestick
-chart with a real drawing-tool set (trend lines, Fibonacci, channels, long/
-short markers), then act on what you see three ways: place an order by hand,
+You can watch the full S&P 500 on a candlestick chart with a real
+drawing-tool set (trend lines, Fibonacci, channels, long/short markers), then
+act on what you see three ways: place an order by hand,
 type a plain-English instruction ("buy 10 AAPL") for an AI to translate into
 an order, or write a Python strategy that trades on its own — live or
 backtested against history. Positions carry leverage, margin, and liquidation
@@ -34,10 +33,10 @@ private, less-checked path to the order book.
 
 ```
 market data ──► TradingEngine ──┬─► REST + WebSocket API ──► React terminal
-(Binance/Yahoo/    (orders,     ├─► MCP server ──► Claude Desktop / Code
- Finnhub/Alpaca)   fills,       └─► strategy sandbox ──► backtester
-                   positions,
-                   margin)
+(Yahoo/Finnhub/     (orders,     ├─► MCP server ──► Claude Desktop / Code
+    Alpaca)         fills,       └─► strategy sandbox ──► backtester
+                    positions,
+                    margin)
 ```
 
 Backend is Python 3.12 on FastAPI (fully async), SQLAlchemy over SQLite
@@ -48,23 +47,16 @@ Backend is Python 3.12 on FastAPI (fully async), SQLAlchemy over SQLite
 `docs/` (`SPINE.md`, `API_CONTRACT.md`, `FRONTEND_SPEC.md`, `STRATEGIES.md`,
 `MCP.md`).
 
-## 3. Market data: routed by asset class, never invented
+## 3. Market data: routed through a provider chain, never invented
 
-Crypto always goes to Binance's public API — keyless, real-time, no rate
-limit worth worrying about. US equities try Finnhub or Alpaca first if you've
-set keys for them, and fall back to Yahoo (15-minute delayed) if not. Every
-quote carries its own `source` and `delay` label rather than presenting
-everything as equally fresh.
+US equities try Finnhub or Alpaca first if you've set keys for them, and
+fall back to Yahoo (15-minute delayed) if not. Every quote carries its own
+`source` and `delay` label rather than presenting everything as equally
+fresh.
 
 If every provider fails, the service serves the last cached price rather
 than fabricate one — and if there's no cache either, it returns an honest
-error instead of a zero or a stale-looking success. That matters more than
-it sounds: one deployment gotcha we hit directly is that Binance.com
-geo-blocks requests from US IP ranges, which includes most Render/AWS/GCP
-regions by default. Deploy this in a US region and crypto data goes
-completely dark while equities (Yahoo isn't geo-restricted) keep working
-fine — the app tells you honestly via a 503, it doesn't paper over it. The
-fix is picking a non-US hosting region.
+error instead of a zero or a stale-looking success.
 
 ## 4. The strategy sandbox, and why NumPy and pandas are banned
 
@@ -140,10 +132,9 @@ then starts the API on `:8000` and the frontend on `:5173` together, waiting
 for the backend health check before opening the UI. Ctrl+C stops both. Ports
 are configurable (`QUANTDECK_PORT=9000 FRONTEND_PORT=5000 ./start.sh`).
 
-Crypto works out of the box (Binance needs no key). For real-time US-equity
-data, add a free Finnhub or Alpaca key to `backend/.env`; otherwise it falls
-back to delayed Yahoo data automatically. Add `ANTHROPIC_API_KEY` to enable
-the AI features.
+For real-time US-equity data, add a free Finnhub or Alpaca key to
+`backend/.env`; otherwise it falls back to delayed Yahoo data automatically.
+Add `ANTHROPIC_API_KEY` to enable the AI features.
 
 <details>
 <summary>Run the two services separately</summary>

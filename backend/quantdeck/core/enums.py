@@ -10,10 +10,9 @@ from enum import Enum
 
 
 class AssetClass(str, Enum):
-    """The two — and only two — asset universes this platform supports."""
+    """The one — and only — asset universe this platform supports."""
 
     US_EQUITY = "us_equity"
-    CRYPTO = "crypto"
 
 
 class OrderSide(str, Enum):

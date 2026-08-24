@@ -50,7 +50,7 @@ interface Props {
 
 export default function BacktestPanel({ defaultSymbol }: Props) {
   // ---- form state ---------------------------------------------------------
-  const [symbols, setSymbols] = useState(defaultSymbol ?? "BTC/USDT");
+  const [symbols, setSymbols] = useState(defaultSymbol ?? "AAPL");
   const [interval, setInterval] = useState<string>("1d");
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
@@ -238,7 +238,7 @@ function BacktestForm(p: FormProps) {
               className="input mono"
               value={p.symbols}
               onChange={(e) => p.setSymbols(e.target.value)}
-              placeholder="BTC/USDT, ETH/USDT, AAPL"
+              placeholder="AAPL, MSFT, NVDA"
             />
           </label>
 

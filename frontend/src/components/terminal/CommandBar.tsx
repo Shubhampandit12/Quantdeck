@@ -62,7 +62,7 @@ export default function CommandBar() {
         <span className="cmd-prompt">›</span>
         <input
           className="input"
-          placeholder="Ask the AI or enter an order in plain English (e.g. 'buy 0.5 BTC at market')"
+          placeholder="Ask the AI or enter an order in plain English (e.g. 'buy 10 AAPL at market')"
           value={text}
           onChange={(e) => setText(e.target.value)}
           disabled={busy}

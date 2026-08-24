@@ -18,7 +18,7 @@ export function fmtNum(n: number | null | undefined, dp = 2): string {
   });
 }
 
-/** Adaptive price formatting: more decimals for small crypto prices. */
+/** Adaptive price formatting: more decimals for small prices. */
 export function fmtPrice(n: number | null | undefined): string {
   if (n === null || n === undefined || Number.isNaN(n)) return "—";
   const abs = Math.abs(n);

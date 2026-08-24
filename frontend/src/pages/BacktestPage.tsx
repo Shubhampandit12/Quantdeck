@@ -4,7 +4,7 @@ import BacktestPanel from "../components/BacktestPanel";
 import "./BacktestPage.css";
 
 export default function BacktestPage() {
-  // Allow pre-seeding the symbol via ?symbol=BTC/USDT (e.g. from the terminal).
+  // Allow pre-seeding the symbol via ?symbol=AAPL (e.g. from the terminal).
   const [params] = useSearchParams();
   const defaultSymbol = params.get("symbol") ?? undefined;
 

@@ -40,7 +40,7 @@ export default function TerminalPage() {
   const [strategyLogs, setStrategyLogs] = useState<LogLine[]>([]);
   const [connected, setConnected] = useState(false);
 
-  // Decode the route symbol (BTC%2FUSDT -> BTC/USDT) and sync it into the store.
+  // Decode the route symbol and sync it into the store.
   useEffect(() => {
     if (symbol) {
       const decoded = decodeURIComponent(symbol);

@@ -19,14 +19,14 @@ backend/quantdeck/
                    # async for e in bus.subscribe(portfolio_id=, types=)
     errors.py      # QuantDeckError + subclasses (DataUnavailableError,
                    # OrderRejected, InsufficientBuyingPower, RiskLimitExceeded,...)
-    symbols.py     # normalize_symbol(), classify()->AssetClass, to_crypto_pair()
+    symbols.py     # normalize_symbol(), classify()->AssetClass
   db/
     database.py    # Base, engine, SessionLocal, init_db(), get_session()
     models.py      # PortfolioORM, PositionORM, OrderORM, FillORM, StrategyORM
   marketdata/
     base.py        # MarketDataProvider (ABC), MarketData (Protocol), VALID_INTERVALS
     service.py     # << BUILD: MarketDataService + get_market_data() singleton >>
-    providers/     # << BUILD: binance.py, yahoo.py, finnhub.py, alpaca.py >>
+    providers/     # << BUILD: yahoo.py, finnhub.py, alpaca.py >>
     sp500.py       # << BUILD: S&P 500 constituent list loader >>
   engine/
     interface.py   # EngineProtocol (frozen public surface)
@@ -68,11 +68,11 @@ backend/quantdeck/
 ```python
 md = get_market_data()
 q: Quote = await md.get_quote("AAPL")
-price: float = await md.get_price("BTC/USDT")
+price: float = await md.get_price("AAPL")
 ohlcv: OHLCVResponse = await md.get_ohlcv("AAPL", "1d", limit=500)
 results: list[SymbolInfo] = await md.search_symbols("app")
 syms: list[SymbolInfo] = await md.get_symbols(AssetClass.US_EQUITY)  # includes S&P500
-async for quote in md.subscribe(["BTC/USDT"]): ...
+async for quote in md.subscribe(["AAPL"]): ...
 ```
 
 ## The Engine surface (consumers call these) — see engine/interface.py

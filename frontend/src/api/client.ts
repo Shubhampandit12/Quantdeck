@@ -70,7 +70,7 @@ export const api = {
     return req<OHLCVResponse>(`/ohlcv/${enc(symbol)}?${p.toString()}`);
   },
   marketSummary: () =>
-    req<{ movers_up: Quote[]; movers_down: Quote[]; crypto: Quote[]; stocks: Quote[] }>(
+    req<{ movers_up: Quote[]; movers_down: Quote[]; stocks: Quote[] }>(
       "/market/summary",
     ),
 

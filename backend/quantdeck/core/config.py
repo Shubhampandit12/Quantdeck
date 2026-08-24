@@ -41,7 +41,6 @@ class Settings(BaseSettings):
     us_equity_providers: list[str] = Field(
         default_factory=lambda: ["finnhub", "alpaca", "yahoo"]
     )
-    crypto_provider: str = "binance"
 
     # Cache TTLs (seconds)
     quote_cache_ttl: float = 2.0

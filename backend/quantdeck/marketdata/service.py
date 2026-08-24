@@ -4,14 +4,11 @@ Everything that needs prices (engine, API, MCP, strategy runtime, backtest)
 talks to a :class:`MarketDataService` obtained from :func:`get_market_data`.
 The service:
 
-  * routes each symbol to the right provider by asset class
-    (crypto -> Binance; US equity -> first working of
-    ``settings.us_equity_providers``),
+  * routes each symbol to the first working of ``settings.us_equity_providers``,
   * caches quotes / OHLCV / symbol lists with TTLs from settings,
-  * exposes the S&P 500 (via :func:`load_sp500`) and a curated crypto universe,
-  * searches across both universes,
-  * merges realtime updates into one :meth:`subscribe` stream (Binance ws for
-    crypto; REST polling for equities),
+  * exposes the S&P 500 (via :func:`load_sp500`),
+  * searches across that universe,
+  * streams realtime updates via REST polling in :meth:`subscribe`,
   * and NEVER fabricates a price — provider failure surfaces as
     :class:`DataUnavailableError`, while a rate-limit falls back to cache.
 
@@ -28,69 +25,20 @@ from ..core.config import settings
 from ..core.enums import AssetClass, DataDelay
 from ..core.errors import DataUnavailableError, ProviderRateLimited
 from ..core.models import OHLCVResponse, Quote, SymbolInfo
-from ..core.symbols import classify, normalize_symbol, to_crypto_pair
+from ..core.symbols import classify, normalize_symbol
 from .base import VALID_INTERVALS, MarketDataProvider
 from .providers.alpaca import AlpacaProvider
-from .providers.binance import BinanceProvider
 from .providers.finnhub import FinnhubProvider
 from .providers.yahoo import YahooProvider
 from .sp500 import load_sp500
 
 log = logging.getLogger("quantdeck.marketdata.service")
 
-# --------------------------------------------------------------------------- #
-# Curated crypto universe (~40 top pairs, all USDT-quoted for Binance).       #
-# --------------------------------------------------------------------------- #
-_CRYPTO_UNIVERSE: tuple[tuple[str, str], ...] = (
-    ("BTC/USDT", "Bitcoin"),
-    ("ETH/USDT", "Ethereum"),
-    ("BNB/USDT", "BNB"),
-    ("SOL/USDT", "Solana"),
-    ("XRP/USDT", "XRP"),
-    ("ADA/USDT", "Cardano"),
-    ("DOGE/USDT", "Dogecoin"),
-    ("AVAX/USDT", "Avalanche"),
-    ("TRX/USDT", "TRON"),
-    ("DOT/USDT", "Polkadot"),
-    ("LINK/USDT", "Chainlink"),
-    ("MATIC/USDT", "Polygon"),
-    ("TON/USDT", "Toncoin"),
-    ("LTC/USDT", "Litecoin"),
-    ("BCH/USDT", "Bitcoin Cash"),
-    ("SHIB/USDT", "Shiba Inu"),
-    ("UNI/USDT", "Uniswap"),
-    ("ATOM/USDT", "Cosmos"),
-    ("XLM/USDT", "Stellar"),
-    ("ETC/USDT", "Ethereum Classic"),
-    ("NEAR/USDT", "NEAR Protocol"),
-    ("APT/USDT", "Aptos"),
-    ("FIL/USDT", "Filecoin"),
-    ("ARB/USDT", "Arbitrum"),
-    ("OP/USDT", "Optimism"),
-    ("IMX/USDT", "Immutable"),
-    ("HBAR/USDT", "Hedera"),
-    ("VET/USDT", "VeChain"),
-    ("INJ/USDT", "Injective"),
-    ("SUI/USDT", "Sui"),
-    ("AAVE/USDT", "Aave"),
-    ("GRT/USDT", "The Graph"),
-    ("ALGO/USDT", "Algorand"),
-    ("SAND/USDT", "The Sandbox"),
-    ("MANA/USDT", "Decentraland"),
-    ("AXS/USDT", "Axie Infinity"),
-    ("FTM/USDT", "Fantom"),
-    ("RUNE/USDT", "THORChain"),
-    ("EGLD/USDT", "MultiversX"),
-    ("THETA/USDT", "Theta Network"),
-)
-
 
 class MarketDataService:
     """Routes, caches, and streams market data behind the MarketData protocol."""
 
     def __init__(self) -> None:
-        # Crypto provider is always Binance (public, keyless, realtime).
-        self._binance = BinanceProvider()
         # US-equity providers are built on demand from settings, in preference
         # order. The first one that successfully answers a request wins for
         # that call; we do not pin a single provider globally so a keyed
@@ -130,8 +78,6 @@ class MarketDataService:
         return built
 
     def _providers_for(self, asset_class: AssetClass) -> list[MarketDataProvider]:
-        if asset_class is AssetClass.CRYPTO:
-            return [self._binance]
         return self._equity_providers
 
     # ------------------------------------------------------------------ #
@@ -146,8 +92,7 @@ class MarketDataService:
 
     async def aclose(self) -> None:
         """Close every provider's HTTP client/websocket."""
-        providers: list[MarketDataProvider] = [self._binance, *self._equity_providers]
-        for p in providers:
+        for p in self._equity_providers:
             try:
                 await p.aclose()
             except Exception as exc:  # noqa: BLE001 - best-effort shutdown
@@ -273,7 +218,7 @@ class MarketDataService:
         return [s for s in universe if s.asset_class is asset_class]
 
     async def _load_universe(self) -> list[SymbolInfo]:
-        """Assemble (and cache) the S&P 500 + curated crypto universe."""
+        """Assemble (and cache) the S&P 500 universe."""
         if self._symbol_cache is not None:
             return self._symbol_cache
         cached = await self._meta_cache.get("universe")
@@ -283,19 +228,7 @@ class MarketDataService:
             return cached
 
         # load_sp500 may do blocking I/O in its dynamic path; run off-loop.
-        equities = await asyncio.to_thread(load_sp500)
-        crypto = [
-            SymbolInfo(
-                symbol=sym,
-                name=name,
-                asset_class=AssetClass.CRYPTO,
-                exchange="Binance",
-                provider_symbol=sym.replace("/", ""),
-                tradable=True,
-            )
-            for sym, name in _CRYPTO_UNIVERSE
-        ]
-        universe = [*equities, *crypto]
+        universe = await asyncio.to_thread(load_sp500)
         self._symbol_cache = universe
         self._reindex(universe)
         await self._meta_cache.set("universe", universe)
@@ -305,7 +238,7 @@ class MarketDataService:
         self._symbol_index = {s.symbol.upper(): s for s in universe}
 
     async def search_symbols(self, query: str, limit: int = 25) -> list[SymbolInfo]:
-        """Substring search across the known universe (equities + crypto)."""
+        """Substring search across the known universe."""
         q = (query or "").strip().upper()
         if not q:
             return []
@@ -315,10 +248,9 @@ class MarketDataService:
         for info in universe:
             sym = info.symbol.upper()
             name = info.name.upper()
-            base = sym.split("/")[0]  # crypto base ("BTC" from "BTC/USDT")
-            if sym == q or base == q:
+            if sym == q:
                 rank = 0
-            elif sym.startswith(q) or base.startswith(q):
+            elif sym.startswith(q):
                 rank = 1
             elif q in sym:
                 rank = 2
@@ -337,22 +269,17 @@ class MarketDataService:
     # Realtime subscription (merged stream)                              #
     # ------------------------------------------------------------------ #
     async def subscribe(self, symbols: list[str]) -> AsyncIterator[Quote]:
-        """Yield realtime quotes for a mix of crypto and equity symbols.
+        """Yield realtime quotes for a set of equity symbols.
 
-        Crypto flows through Binance's websocket; equities are polled over REST
-        on a short interval. Both feed a single internal queue so the caller
-        sees one merged stream. Cancelling the async generator tears down all
-        of the underlying tasks.
+        Equities are polled over REST on a short interval, feeding a single
+        internal queue. Cancelling the async generator tears down the
+        underlying task.
         """
-        canon = [self._canonical(s) for s in symbols]
-        crypto = [s for s in canon if classify(s) is AssetClass.CRYPTO]
-        equities = [s for s in canon if classify(s) is AssetClass.US_EQUITY]
+        equities = [self._canonical(s) for s in symbols]
 
         queue: asyncio.Queue[Quote] = asyncio.Queue(maxsize=1000)
         tasks: list[asyncio.Task] = []
 
-        if crypto:
-            tasks.append(asyncio.create_task(self._pump_crypto(crypto, queue)))
         if equities:
             tasks.append(asyncio.create_task(self._poll_equities(equities, queue)))
 
@@ -367,22 +294,6 @@ class MarketDataService:
                     await t
                 except (asyncio.CancelledError, Exception):  # noqa: BLE001
                     pass
-
-    async def _pump_crypto(
-        self, symbols: list[str], queue: asyncio.Queue[Quote]
-    ) -> None:
-        """Drive Binance's websocket, falling back to REST polling on failure."""
-        try:
-            async for quote in self._binance.stream_quotes(symbols):
-                await self._offer(queue, quote)
-        except NotImplementedError:
-            # websockets library missing -> poll REST instead.
-            await self._poll(symbols, queue, interval=2.0)
-        except asyncio.CancelledError:
-            raise
-        except Exception as exc:  # noqa: BLE001 - degrade to polling
-            log.warning("crypto stream failed, polling instead: %s", exc)
-            await self._poll(symbols, queue, interval=2.0)
 
     async def _poll_equities(
         self, symbols: list[str], queue: asyncio.Queue[Quote]
@@ -424,32 +335,26 @@ class MarketDataService:
     # Market summary helper (used by /api/market/summary)                #
     # ------------------------------------------------------------------ #
     async def get_market_summary(
-        self, *, stock_sample: int = 12, crypto_sample: int = 12
+        self, *, stock_sample: int = 12
     ) -> dict[str, list[Quote]]:
         """Assemble a lightweight dashboard summary.
 
-        Returns quotes for a sample of large-cap stocks and top crypto, plus
-        the biggest movers among them. Symbols that cannot be quoted are simply
-        omitted (never fabricated).
+        Returns quotes for a sample of large-cap stocks, plus the biggest
+        movers among them. Symbols that cannot be quoted are simply omitted
+        (never fabricated).
         """
         universe = await self._load_universe()
         stocks_syms = [
             s.symbol for s in universe if s.asset_class is AssetClass.US_EQUITY
         ][:stock_sample]
-        crypto_syms = [
-            s.symbol for s in universe if s.asset_class is AssetClass.CRYPTO
-        ][:crypto_sample]
 
         stock_quotes = await self._gather_quotes(stocks_syms)
-        crypto_quotes = await self._gather_quotes(crypto_syms)
 
-        combined = [*stock_quotes, *crypto_quotes]
-        with_change = [q for q in combined if q.change_percent is not None]
+        with_change = [q for q in stock_quotes if q.change_percent is not None]
         movers = sorted(with_change, key=lambda q: q.change_percent, reverse=True)
         return {
             "movers_up": movers[:5],
             "movers_down": list(reversed(movers[-5:])) if movers else [],
-            "crypto": crypto_quotes,
             "stocks": stock_quotes,
         }
 
@@ -466,8 +371,6 @@ class MarketDataService:
     @staticmethod
     def _canonical(symbol: str) -> str:
         """Normalize a caller symbol into canonical form for routing/keys."""
-        if classify(symbol) is AssetClass.CRYPTO:
-            return to_crypto_pair(symbol)
         return normalize_symbol(symbol)
 
 

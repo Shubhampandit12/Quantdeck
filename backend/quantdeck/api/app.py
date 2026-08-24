@@ -57,9 +57,8 @@ def _provider_status() -> dict:
     """A small, honest summary of which data providers are configured.
 
     Keys are provider names; values indicate whether credentials are present
-    (crypto/yahoo need none, so they're always 'available')."""
+    (yahoo needs none, so it's always 'available')."""
     return {
-        "binance": "available",          # public REST, no key
         "yahoo": "available",            # public REST, no key
         "finnhub": "configured" if settings.finnhub_api_key else "unconfigured",
         "alpaca": (
@@ -167,7 +166,7 @@ def _mount_frontend(app: FastAPI) -> None:
     index_file = frontend / "index.html"
 
     # SPA catch-all: any non-/api, non-/ws path returns index.html so client-side
-    # routes like /terminal/BTC%2FUSDT deep-link correctly. Real files (favicon,
+    # routes like /terminal/AAPL deep-link correctly. Real files (favicon,
     # etc.) at the frontend root are served directly.
     @app.get("/{full_path:path}", include_in_schema=False)
     async def spa(full_path: str):

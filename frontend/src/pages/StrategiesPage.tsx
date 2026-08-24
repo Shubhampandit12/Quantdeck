@@ -31,7 +31,7 @@ export default function StrategiesPage() {
           <NavLink to="/" end className="qd-nav-link">
             Markets
           </NavLink>
-          <NavLink to="/terminal/BTC%2FUSDT" className="qd-nav-link">
+          <NavLink to="/terminal/AAPL" className="qd-nav-link">
             Charts
           </NavLink>
           <NavLink to="/strategies" className="qd-nav-link">
@@ -88,7 +88,7 @@ export default function StrategiesPage() {
         ) : (
           <div className="strat-page-nopf card">
             <p>No active paper portfolio yet.</p>
-            <Link to="/terminal/BTC%2FUSDT" className="btn btn-primary">
+            <Link to="/terminal/AAPL" className="btn btn-primary">
               Go to the terminal to create one
             </Link>
           </div>

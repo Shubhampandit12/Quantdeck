@@ -573,5 +573,5 @@ def _order_type(value: str) -> OrderType:
 
 
 # Keep a reference to classify so linters don't flag the import as unused; it is
-# used implicitly via context/aggregation of crypto vs equity symbols upstream.
+# used implicitly via context/aggregation of symbols upstream.
 _ = classify

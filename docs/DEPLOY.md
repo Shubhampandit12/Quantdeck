@@ -45,9 +45,8 @@ docker run -p 8000:8000 quantdeck        # open http://localhost:8000
   (Caddy/Nginx) with TLS.
 
 ## Optional real-time US-stock data
-Crypto is real-time and keyless (Binance). US equities fall back to Yahoo
-(15-min delayed) unless you set a free `QUANTDECK_FINNHUB_API_KEY` (or Alpaca
-keys) as a platform env var / secret.
+US equities fall back to Yahoo (15-min delayed) unless you set a free
+`QUANTDECK_FINNHUB_API_KEY` (or Alpaca keys) as a platform env var / secret.
 
 ## Security reminder
 - Never commit `.env` or API keys — they're gitignored and injected as platform

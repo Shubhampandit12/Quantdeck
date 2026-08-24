@@ -369,7 +369,7 @@ export default function AISessionPanel({ portfolioId }: Props) {
             <span className="ai-label">Strategy prompt</span>
             <textarea
               className="input ai-prompt"
-              placeholder="Describe the strategy in plain English, e.g. 'Buy dips in BTC and ETH, take profit at +3%, keep total exposure under $20k…'"
+              placeholder="Describe the strategy in plain English, e.g. 'Buy dips in AAPL and MSFT, take profit at +3%, keep total exposure under $20k…'"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               disabled={disabled || (hasSession && !isTerminal)}
@@ -383,7 +383,7 @@ export default function AISessionPanel({ portfolioId }: Props) {
               <span className="ai-sublabel">Allowed symbols (comma list)</span>
               <input
                 className="input"
-                placeholder="BTC/USDT, ETH/USDT, AAPL"
+                placeholder="AAPL, MSFT, NVDA"
                 value={guardrails.allowedSymbols}
                 onChange={(e) => setGuard({ allowedSymbols: e.target.value })}
                 disabled={disabled}

@@ -3,7 +3,7 @@ service's symbol listing — all without touching the network.
 
 ``load_sp500`` must ship an embedded static fallback of >=100 well-known S&P 500
 tickers so it works with no connectivity. ``get_symbols`` must be servable from
-that list + cached crypto pairs, again offline.
+that list, again offline.
 """
 from __future__ import annotations
 
@@ -17,23 +17,14 @@ from quantdeck.core import symbols
 # --------------------------------------------------------------------------- #
 # symbols.classify / normalize                                                #
 # --------------------------------------------------------------------------- #
-def test_classify_equity_vs_crypto():
+def test_classify_is_always_us_equity():
     assert symbols.classify("AAPL") == AssetClass.US_EQUITY
     assert symbols.classify("BRK.B") == AssetClass.US_EQUITY
-    # A slash always means crypto.
-    assert symbols.classify("BTC/USDT") == AssetClass.CRYPTO
-    # A bare token ending in a known crypto quote is crypto.
-    assert symbols.classify("ETHUSDT") == AssetClass.CRYPTO
-    assert symbols.classify("btcusdt") == AssetClass.CRYPTO
 
 
-def test_normalize_and_pair_helpers():
+def test_normalize_symbol():
     assert symbols.normalize_symbol("  aapl ") == "AAPL"
-    assert symbols.normalize_symbol("btc/usdt") == "BTC/USDT"
-    assert symbols.to_crypto_pair("BTCUSDT") == "BTC/USDT"
-    assert symbols.to_crypto_pair("BTC/USDT") == "BTC/USDT"
-    # A pure equity ticker is left unchanged by to_crypto_pair.
-    assert symbols.to_crypto_pair("AAPL") == "AAPL"
+    assert symbols.normalize_symbol("brk.b") == "BRK.B"
 
 
 # --------------------------------------------------------------------------- #

@@ -17,10 +17,11 @@ services:
     runtime: docker
     dockerfilePath: ./Dockerfile
     plan: free            # change to "starter" for always-on ($7/mo)
-    region: frankfurt      # non-US region: Binance.com geo-blocks US IPs, which
-                            # kills all crypto data (equities via Yahoo are unaffected).
-                            # Render can't move an existing service's region in place —
-                            # this only takes effect on a new service created from this blueprint.
+    region: oregon         # US region — nothing forces a non-US region since this
+                            # only trades US equities (Yahoo/Finnhub/Alpaca don't
+                            # geo-block). Render can't move an existing service's
+                            # region in place — this only takes effect on a new
+                            # service created from this blueprint.
     healthCheckPath: /api/health
     autoDeploy: true      # redeploy on every push to the default branch
     envVars:

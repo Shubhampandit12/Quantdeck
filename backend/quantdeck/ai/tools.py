@@ -53,13 +53,13 @@ def tool_specs() -> list[dict]:
             "name": "get_quote",
             "description": (
                 "Get the latest normalized quote (price, bid/ask, change, data "
-                "source and delay) for one symbol. Symbols: US equities like "
-                "'AAPL' or crypto pairs like 'BTC/USDT'."
+                "source and delay) for one symbol. Symbols are US equity "
+                "tickers like 'AAPL'."
             ),
             "input_schema": {
                 "type": "object",
                 "properties": {
-                    "symbol": {"type": "string", "description": "e.g. 'AAPL' or 'BTC/USDT'"},
+                    "symbol": {"type": "string", "description": "e.g. 'AAPL'"},
                 },
                 "required": ["symbol"],
             },
@@ -95,7 +95,7 @@ def tool_specs() -> list[dict]:
             "name": "search_symbols",
             "description": (
                 "Search tradable instruments by name or ticker fragment. Use "
-                "when the user names a company or coin loosely."
+                "when the user names a company loosely."
             ),
             "input_schema": {
                 "type": "object",
@@ -226,7 +226,7 @@ def tool_specs() -> list[dict]:
             "name": "get_market_summary",
             "description": (
                 "Get a broad market snapshot: top movers up/down plus a handful "
-                "of representative crypto and stock quotes. Use for orientation."
+                "of representative stock quotes. Use for orientation."
             ),
             "input_schema": {"type": "object", "properties": {}},
         },
@@ -401,23 +401,16 @@ async def _market_summary(market_data) -> dict:
     whatever quotes we could actually fetch.
     """
     stock_syms = ["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "TSLA", "META", "SPY"]
-    crypto_syms = ["BTC/USDT", "ETH/USDT", "SOL/USDT", "BNB/USDT"]
 
     stocks: list[dict] = []
-    crypto: list[dict] = []
     for sym in stock_syms:
         try:
             stocks.append(_dump(await market_data.get_quote(sym)))
         except QuantDeckError:
             continue
-    for sym in crypto_syms:
-        try:
-            crypto.append(_dump(await market_data.get_quote(sym)))
-        except QuantDeckError:
-            continue
 
     # Rank all fetched quotes by percent change for movers, ignoring unknowns.
-    ranked = [q for q in (stocks + crypto) if q.get("change_percent") is not None]
+    ranked = [q for q in stocks if q.get("change_percent") is not None]
     ranked.sort(key=lambda q: q["change_percent"], reverse=True)
     movers_up = ranked[:5]
     movers_down = list(reversed(ranked[-5:])) if len(ranked) > 5 else []
@@ -425,6 +418,5 @@ async def _market_summary(market_data) -> dict:
     return {
         "movers_up": movers_up,
         "movers_down": movers_down,
-        "crypto": crypto,
         "stocks": stocks,
     }

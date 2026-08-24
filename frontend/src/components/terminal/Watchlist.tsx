@@ -1,11 +1,11 @@
-// Watchlist — left panel. Tabs (US Stocks / Crypto), searchable, with live prices
+// Watchlist — left panel. Searchable list of US stocks with live prices
 // streamed via openMarketSocket for the currently visible rows.
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./Watchlist.css";
 import { api } from "../../api/client";
 import { openMarketSocket } from "../../api/ws";
 import { useStore } from "../../state/store";
-import type { AssetClass, Quote, SymbolInfo } from "../../api/types";
+import type { Quote, SymbolInfo } from "../../api/types";
 import { fmtPrice, fmtPct, signClass } from "../../lib/format";
 
 interface Props {
@@ -17,17 +17,16 @@ interface Props {
 const MAX_LIVE_ROWS = 60;
 
 export default function Watchlist({ selected, onSelect }: Props) {
-  const [tab, setTab] = useState<AssetClass>("crypto");
   const [symbols, setSymbols] = useState<SymbolInfo[]>([]);
   const [query, setQuery] = useState("");
   const quotes = useStore((s) => s.quotes);
   const applyQuote = useStore((s) => s.applyQuote);
 
-  // Load the symbol universe for the active tab.
+  // Load the symbol universe.
   useEffect(() => {
     let alive = true;
     api
-      .symbols(tab)
+      .symbols("us_equity")
       .then((list) => {
         if (alive) setSymbols(list);
       })
@@ -37,7 +36,7 @@ export default function Watchlist({ selected, onSelect }: Props) {
     return () => {
       alive = false;
     };
-  }, [tab]);
+  }, []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -84,15 +83,6 @@ export default function Watchlist({ selected, onSelect }: Props) {
 
   return (
     <div className="watchlist">
-      <div className="wl-tabs">
-        <button className={tab === "us_equity" ? "active" : ""} onClick={() => setTab("us_equity")}>
-          US Stocks
-        </button>
-        <button className={tab === "crypto" ? "active" : ""} onClick={() => setTab("crypto")}>
-          Crypto
-        </button>
-      </div>
-
       <div className="wl-search">
         <input
           className="input"

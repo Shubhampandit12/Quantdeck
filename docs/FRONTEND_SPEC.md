@@ -12,7 +12,7 @@ lightweight-charts**. Dark, TradingView-inspired. Files under `frontend/src`.
 
 ## Routing (react-router-dom)
 - `/` → `HomePage` (TradingView-style landing).
-- `/terminal/:symbol?` → `TerminalPage` (full trading terminal). Default symbol BTC/USDT.
+- `/terminal/:symbol?` → `TerminalPage` (full trading terminal). Default symbol AAPL.
 
 ## Currency / number formatting
 Provide `src/lib/format.ts`: `fmtUsd(n)`, `fmtNum(n, dp)`, `fmtPct(n)`, `fmtSigned(n)`.
@@ -23,16 +23,16 @@ Green for >=0, red for <0 using `.up`/`.down`.
 ### HomePage (`src/pages/HomePage.tsx` + `HomePage.css`)
 Resembles TradingView home:
 - Top nav bar: logo "QuantDeck", nav links (Markets / Charts / Strategies / Backtest), a symbol search box (calls api.search, navigates to /terminal/:symbol), and a permanent `PAPER / DEMO MONEY` badge (.badge-demo).
-- Hero: bold headline (e.g. "Trade the markets with AI — with zero real-money risk"), subtext, big CTA button "Open the trading terminal" → /terminal/BTC%2FUSDT.
-- Market overview: a scrolling ticker tape of major symbols (BTC/USDT, ETH/USDT, AAPL, MSFT, NVDA, TSLA, SPY...) with live price + change% (subscribe via openMarketSocket; seed with api.quotes). Mini sparkline optional (can fetch small ohlcv).
+- Hero: bold headline (e.g. "Trade the markets with AI — with zero real-money risk"), subtext, big CTA button "Open the trading terminal" → /terminal/AAPL.
+- Market overview: a scrolling ticker tape of major symbols (AAPL, MSFT, NVDA, TSLA, AMZN, GOOGL, META, SPY...) with live price + change% (subscribe via openMarketSocket; seed with api.quotes). Mini sparkline optional (can fetch small ohlcv).
 - Movers: "Top Gainers / Top Losers" cards from api.marketSummary().
 - Watchlist preview + a features section (AI trading, code backtesting, paper portfolios, leverage) as cards.
 - Clicking any symbol anywhere → navigate to /terminal/:symbol.
 
 ### TerminalPage (`src/pages/TerminalPage.tsx` + css) — the full terminal
 Grid layout (TradingView-like):
-- TopBar (own component): symbol search, asset-class filter (US Stocks / Crypto), timeframe selector (1m/5m/15m/1h/4h/1d/1w), portfolio switcher (dropdown of portfolios + "New" + "Reset"), leverage display + editor, balance/equity display, connection status dot, PAPER/DEMO badge.
-- Left panel: `Watchlist` component with tabs (US Stocks shows S&P500 from api.symbols('us_equity'); Crypto from api.symbols('crypto')), searchable, live prices; click selects symbol.
+- TopBar (own component): symbol search, timeframe selector (1m/5m/15m/1h/4h/1d/1w), portfolio switcher (dropdown of portfolios + "New" + "Reset"), leverage display + editor, balance/equity display, connection status dot, PAPER/DEMO badge.
+- Left panel: `Watchlist` component showing the S&P 500 from api.symbols('us_equity'), searchable, live prices; click selects symbol.
 - Center: `ChartPanel` — lightweight-charts candlestick, loads api.ohlcv on symbol/interval change, updates last candle from live quotes (openMarketSocket). Shows data source + delay label (badge-rt / badge-delayed from quote.source/quote.delay). Includes the DrawingToolbar + drawing overlay (see below).
 - Right panel: `OrderTicket` — side (buy/sell), type (market/limit/stop/stop_limit), qty, price/stop fields, leverage selector, TP/SL, submit → api.placeOrder; show buying power, margin used, and estimated liquidation. Below it a compact `PortfolioSummary` (cash, equity, unrealized pnl, realized pnl).
 - Bottom panel: tabbed `Positions | Open Orders | Trade History | Strategy Logs | AI Session`. Positions table (symbol, side, qty, avg, last, uPnL, liq price, close btn). Open orders (cancel btn). History (fills). Strategy logs stream. AI session trace stream.

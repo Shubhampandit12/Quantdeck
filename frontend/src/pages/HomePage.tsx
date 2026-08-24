@@ -13,19 +13,17 @@ import "./HomePage.css";
 
 // Major symbols shown in the ticker tape and watchlist preview.
 const TICKER_SYMBOLS = [
-  "BTC/USDT",
-  "ETH/USDT",
-  "SOL/USDT",
   "AAPL",
   "MSFT",
   "NVDA",
   "TSLA",
   "AMZN",
   "GOOGL",
+  "META",
   "SPY",
 ];
 
-// Route to the terminal for a given symbol (URL-encoded so "BTC/USDT" survives).
+// Route to the terminal for a given symbol.
 const terminalPath = (symbol: string) => `/terminal/${encodeURIComponent(symbol)}`;
 
 /** Compute a display change% for a quote (prefer explicit change_percent). */
@@ -127,12 +125,12 @@ export default function HomePage() {
             with zero real-money risk
           </h1>
           <p className="hero-sub">
-            A full TradingView-style terminal for stocks and crypto. Chart, draw,
+            A full TradingView-style terminal for US stocks. Chart, draw,
             place paper orders, run code backtests, and let an AI agent trade a
             demo portfolio for you.
           </p>
           <div className="hero-cta">
-            <Link className="btn btn-primary btn-lg" to={terminalPath("BTC/USDT")}>
+            <Link className="btn btn-primary btn-lg" to={terminalPath("AAPL")}>
               Open the trading terminal →
             </Link>
             <Link className="btn btn-lg" to="/backtest">
@@ -173,7 +171,7 @@ export default function HomePage() {
       <section className="home-section">
         <div className="section-head">
           <h2 className="section-title">Markets at a glance</h2>
-          <Link className="section-sub" to={terminalPath("BTC/USDT")}>
+          <Link className="section-sub" to={terminalPath("AAPL")}>
             Open full watchlist →
           </Link>
         </div>
@@ -239,7 +237,7 @@ function HomeNav() {
       </Link>
       <div className="home-nav-links">
         <Link to="/terminal">Markets</Link>
-        <Link to={terminalPath("BTC/USDT")}>Charts</Link>
+        <Link to={terminalPath("AAPL")}>Charts</Link>
         <Link to="/strategies">Strategies</Link>
         <Link to="/backtest">Backtest</Link>
       </div>
@@ -445,9 +443,8 @@ function MoversCard({
 }
 
 /* ============================================================ Static bits */
-// A rough asset-class label for a symbol (crypto pairs contain "/").
-function assetLabel(symbol: string): string {
-  return symbol.includes("/") ? "Crypto" : "US Equity";
+function assetLabel(_symbol: string): string {
+  return "US Equity";
 }
 
 interface Feature {
@@ -473,7 +470,7 @@ const FEATURES: Feature[] = [
   {
     icon: "💼",
     title: "Paper Portfolios",
-    desc: "Trade stocks and crypto with demo money. Track positions, orders, and realized P&L in real time.",
+    desc: "Trade US stocks with demo money. Track positions, orders, and realized P&L in real time.",
     to: "/terminal",
   },
   {

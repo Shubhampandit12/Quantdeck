@@ -6,7 +6,7 @@ FROZEN CONTRACT. A user strategy looks like:
 
     class MyStrategy(Strategy):
         def on_start(self, ctx):
-            ctx.subscribe(["BTC/USDT"])
+            ctx.subscribe(["AAPL"])
             self.fast, self.slow = 10, 30
 
         def on_bar(self, ctx, bar):

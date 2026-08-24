@@ -1,7 +1,7 @@
 // Canonical TypeScript types — mirror of backend/quantdeck/core/models.py.
 // FROZEN CONTRACT. See docs/API_CONTRACT.md.
 
-export type AssetClass = "us_equity" | "crypto";
+export type AssetClass = "us_equity";
 export type OrderSide = "buy" | "sell";
 export type OrderType = "market" | "limit" | "stop" | "stop_limit";
 export type OrderStatus =
