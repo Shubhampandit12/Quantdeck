@@ -1,3 +1,4 @@
+import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
@@ -5,6 +6,14 @@ import react from "@vitejs/plugin-react";
 // and API share an origin during development.
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      // Mirrors the "@/*" path in tsconfig.json — shadcn-style components
+      // (components/ui/*, lib/utils) import via "@/...", so Vite needs its
+      // own alias too (tsconfig paths only affect the type checker).
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
   server: {
     port: 5173,
     proxy: {

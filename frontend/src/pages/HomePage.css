@@ -204,30 +204,24 @@
 /* ---------------------------------------------------------------- Hero */
 .home-hero {
   position: relative;
+  min-height: 560px;
   padding: var(--sp-8) var(--sp-6) calc(var(--sp-8) + var(--sp-6));
   text-align: center;
   overflow: hidden;
   border-bottom: 1px solid var(--border);
 }
-/* Layered radial glows behind the hero for a soft, expensive backdrop. */
-.home-hero::before {
-  content: "";
+/* Animated kinetic-lattice canvas backdrop (components/ui/kinetic-matrix).
+   Sits behind .hero-inner; z-index below it so the real headline/CTA stay
+   clickable, but the canvas's own PULSE/FREEZE controls remain interactive
+   since they live outside .hero-inner's centered column. */
+.hero-canvas {
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-      680px circle at 50% -8%,
-      rgba(79, 134, 255, 0.22),
-      transparent 62%
-    ),
-    radial-gradient(
-      520px circle at 78% 8%,
-      rgba(122, 92, 255, 0.16),
-      transparent 60%
-    );
-  pointer-events: none;
+  z-index: 0;
 }
 .hero-inner {
   position: relative;
+  z-index: 1;
   max-width: 860px;
   margin: 0 auto;
   padding-top: var(--sp-6);

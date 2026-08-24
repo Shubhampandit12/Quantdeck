@@ -9,6 +9,7 @@ import { api } from "../api/client";
 import { openMarketSocket } from "../api/ws";
 import type { Quote, SymbolInfo } from "../api/types";
 import { fmtPrice, fmtPct, signClass } from "../lib/format";
+import { KineticMatrix } from "@/components/ui/kinetic-matrix";
 import "./HomePage.css";
 
 // Major symbols shown in the ticker tape and watchlist preview.
@@ -114,6 +115,9 @@ export default function HomePage() {
 
       {/* ------------------------------------------------------------- Hero */}
       <header className="home-hero">
+        <div className="hero-canvas">
+          <KineticMatrix title="" className="h-full w-full" />
+        </div>
         <div className="hero-inner">
           <div className="hero-eyebrow">
             <span className="dot" />

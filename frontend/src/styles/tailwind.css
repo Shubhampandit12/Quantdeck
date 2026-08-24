@@ -1,0 +1,8 @@
+/* Tailwind, added additively for shadcn-style components (components/ui/*).
+ * Deliberately NOT importing `@tailwind base;` — that layer resets global
+ * element styles (buttons, inputs, headings, etc.) which would break the
+ * existing hand-rolled design system in ./theme.css. Only utilities and the
+ * (currently empty) components layer are loaded. See tailwind.config.js.
+ */
+@tailwind components;
+@tailwind utilities;
