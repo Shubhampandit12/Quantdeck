@@ -1,5 +1,6 @@
 // ChartPanel — lightweight-charts candlestick chart with live in-place candle
-// updates, a data-source/delay badge, and the drawing toolbar + overlay.
+// updates and a data-source/delay badge. Read-only: no drawing tools: zoom
+// (scroll/pinch) and pan (drag) remain available via handleScroll/handleScale.
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   createChart,
@@ -14,9 +15,6 @@ import { api } from "../../api/client";
 import { openMarketSocket } from "../../api/ws";
 import type { Bar, DataDelay, Quote } from "../../api/types";
 import { fmtPrice } from "../../lib/format";
-import DrawingToolbar from "../drawing/DrawingToolbar";
-import DrawingLayer from "../drawing/DrawingLayer";
-import { useDrawingTool } from "../drawing/toolState";
 
 interface Props {
   symbol: string;
@@ -47,16 +45,6 @@ export default function ChartPanel({ symbol, interval }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
-
-  // Store chart/series in React state too so the DrawingLayer re-renders once ready.
-  const [chart, setChart] = useState<IChartApi | null>(null);
-  const [series, setSeries] = useState<ISeriesApi<"Candlestick"> | null>(null);
-
-  // Active drawing tool + clear-all live in a shared store so the (frozen-prop)
-  // DrawingLayer can coordinate without extra props.
-  const activeTool = useDrawingTool((s) => s.activeTool);
-  const setActiveTool = useDrawingTool((s) => s.setActiveTool);
-  const requestClearAll = useDrawingTool((s) => s.requestClearAll);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -110,16 +98,12 @@ export default function ChartPanel({ symbol, interval }: Props) {
     });
     chartRef.current = c;
     seriesRef.current = s;
-    setChart(c);
-    setSeries(s);
     // Expose the chart for e2e verification / debugging (harmless).
     (window as unknown as { __qdChart?: IChartApi }).__qdChart = c;
     return () => {
       c.remove();
       chartRef.current = null;
       seriesRef.current = null;
-      setChart(null);
-      setSeries(null);
     };
   }, []);
 
@@ -212,11 +196,8 @@ export default function ChartPanel({ symbol, interval }: Props) {
         {delayBadge}
       </div>
 
-      <DrawingToolbar activeTool={activeTool} onSelect={setActiveTool} onClearAll={requestClearAll} />
-
       <div className="chart-stage">
         <div className="chart-mount" ref={containerRef} />
-        <DrawingLayer chart={chart} series={series} symbol={symbol} containerRef={containerRef} />
       </div>
 
       {loading && <div className="chart-loading">Loading {symbol}…</div>}

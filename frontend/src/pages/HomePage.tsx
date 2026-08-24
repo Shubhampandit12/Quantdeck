@@ -1,6 +1,6 @@
 // HomePage — TradingView-style landing page for QuantDeck (paper/demo trading).
 // Sections: sticky nav w/ search + demo badge, hero + CTA, live ticker tape,
-// top gainers/losers, watchlist preview, and a features grid.
+// and top gainers/losers.
 // All data loads defensively: the backend may return 503 for unavailable data,
 // so every fetch is wrapped in try/catch and degrades to a subtle placeholder.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -125,8 +125,8 @@ export default function HomePage() {
             with zero real-money risk
           </h1>
           <p className="hero-sub">
-            A full TradingView-style terminal for US stocks. Chart, draw,
-            place paper orders, run code backtests, and let an AI agent trade a
+            A full TradingView-style terminal for US stocks. Chart, place
+            paper orders, run code backtests, and let an AI agent trade a
             demo portfolio for you.
           </p>
           <div className="hero-cta">
@@ -164,52 +164,6 @@ export default function HomePage() {
             failed={summaryFailed}
             onSelect={goSymbol}
           />
-        </div>
-      </section>
-
-      {/* --------------------------------------------------- Watchlist */}
-      <section className="home-section">
-        <div className="section-head">
-          <h2 className="section-title">Markets at a glance</h2>
-          <Link className="section-sub" to={terminalPath("AAPL")}>
-            Open full watchlist →
-          </Link>
-        </div>
-        <div className="card watchlist-preview">
-          {tickerItems.map(({ sym, q }) => {
-            const pct = changePct(q);
-            return (
-              <div key={sym} className="wl-row" onClick={() => goSymbol(sym)}>
-                <div className="wl-sym">
-                  <span className="wl-s">{sym}</span>
-                  <span className="wl-n">{assetLabel(sym)}</span>
-                </div>
-                <div className="wl-price mono">
-                  {q ? fmtPrice(q.price) : "—"}
-                </div>
-                <div className={`wl-chg mono ${signClass(pct)}`}>
-                  {pct === null ? "—" : fmtPct(pct)}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* --------------------------------------------------- Features */}
-      <section className="home-section">
-        <div className="section-head">
-          <h2 className="section-title">Everything a trading desk needs</h2>
-          <span className="section-sub">Built for learning, risk-free</span>
-        </div>
-        <div className="features-grid">
-          {FEATURES.map((f) => (
-            <Link key={f.title} className="card feature-card" to={f.to}>
-              <div className="feature-icon">{f.icon}</div>
-              <h3 className="feature-title">{f.title}</h3>
-              <p className="feature-desc">{f.desc}</p>
-            </Link>
-          ))}
         </div>
       </section>
 
@@ -446,37 +400,3 @@ function MoversCard({
 function assetLabel(_symbol: string): string {
   return "US Equity";
 }
-
-interface Feature {
-  icon: string;
-  title: string;
-  desc: string;
-  to: string;
-}
-
-const FEATURES: Feature[] = [
-  {
-    icon: "🤖",
-    title: "AI Trading",
-    desc: "Describe a strategy in plain English and let an AI agent place paper orders with guardrails you set.",
-    to: "/terminal",
-  },
-  {
-    icon: "⚡",
-    title: "Code Backtesting",
-    desc: "Write a strategy, run it over historical data, and see P&L, drawdown, Sharpe, and an equity curve.",
-    to: "/backtest",
-  },
-  {
-    icon: "💼",
-    title: "Paper Portfolios",
-    desc: "Trade US stocks with demo money. Track positions, orders, and realized P&L in real time.",
-    to: "/terminal",
-  },
-  {
-    icon: "📈",
-    title: "Leverage",
-    desc: "Practice with adjustable leverage and margin, complete with buying power and liquidation estimates.",
-    to: "/terminal",
-  },
-];

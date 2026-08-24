@@ -26,34 +26,18 @@ Resembles TradingView home:
 - Hero: bold headline (e.g. "Trade the markets with AI — with zero real-money risk"), subtext, big CTA button "Open the trading terminal" → /terminal/AAPL.
 - Market overview: a scrolling ticker tape of major symbols (AAPL, MSFT, NVDA, TSLA, AMZN, GOOGL, META, SPY...) with live price + change% (subscribe via openMarketSocket; seed with api.quotes). Mini sparkline optional (can fetch small ohlcv).
 - Movers: "Top Gainers / Top Losers" cards from api.marketSummary().
-- Watchlist preview + a features section (AI trading, code backtesting, paper portfolios, leverage) as cards.
 - Clicking any symbol anywhere → navigate to /terminal/:symbol.
+- No watchlist preview and no features grid on this page — the terminal (`/terminal`) and backtest (`/backtest`) CTAs above are the only other entry points.
 
 ### TerminalPage (`src/pages/TerminalPage.tsx` + css) — the full terminal
 Grid layout (TradingView-like):
 - TopBar (own component): symbol search, timeframe selector (1m/5m/15m/1h/4h/1d/1w), portfolio switcher (dropdown of portfolios + "New" + "Reset"), leverage display + editor, balance/equity display, connection status dot, PAPER/DEMO badge.
 - Left panel: `Watchlist` component showing the S&P 500 from api.symbols('us_equity'), searchable, live prices; click selects symbol.
-- Center: `ChartPanel` — lightweight-charts candlestick, loads api.ohlcv on symbol/interval change, updates last candle from live quotes (openMarketSocket). Shows data source + delay label (badge-rt / badge-delayed from quote.source/quote.delay). Includes the DrawingToolbar + drawing overlay (see below).
+- Center: `ChartPanel` — lightweight-charts candlestick, loads api.ohlcv on symbol/interval change, updates last candle from live quotes (openMarketSocket). Shows data source + delay label (badge-rt / badge-delayed from quote.source/quote.delay). Read-only: zoom (scroll/pinch) and pan (drag) via handleScroll/handleScale, but no drawing tools — there is no toolbar and nothing on the chart is user-editable.
 - Right panel: `OrderTicket` — side (buy/sell), type (market/limit/stop/stop_limit), qty, price/stop fields, leverage selector, TP/SL, submit → api.placeOrder; show buying power, margin used, and estimated liquidation. Below it a compact `PortfolioSummary` (cash, equity, unrealized pnl, realized pnl).
 - Bottom panel: tabbed `Positions | Open Orders | Trade History | Strategy Logs | AI Session`. Positions table (symbol, side, qty, avg, last, uPnL, liq price, close btn). Open orders (cancel btn). History (fills). Strategy logs stream. AI session trace stream.
 - Command bar (bottom): a single input that does natural-language order entry / AI chat → api.aiChat; render the reply + trace.
 - Live updates: subscribe openEventSocket(activePortfolioId) → on order/position/portfolio events call store.refreshSnapshot() (debounced) and append to logs/trace.
-
-### DrawingToolbar + overlay (`src/components/drawing/`)
-Left-edge vertical toolbar over the chart with the FULL TradingView-style tool set:
-cursor/crosshair, trend line, ray, extended line, horizontal line, horizontal ray,
-vertical line, parallel channel, Fibonacci retracement, Fibonacci extension, Fib fan,
-rectangle, ellipse, triangle, brush/freehand, highlighter, arrow, price-range ruler,
-date-range ruler, long position, short position, text/callout note, and a trash/"remove all".
-Implement drawings as an SVG (or canvas) overlay aligned to the lightweight-charts
-time/price scales (use chart.timeScale() and series.priceToCoordinate / coordinateToPrice,
-and timeScale coordinate conversions; re-render on 'timeScale visibleLogicalRangeChange'
-and crosshair move). Drawings: click-drag to create; selectable, movable, editable
-(color, thickness, style via a small popover); persist per symbol in localStorage
-(key `qd:drawings:<symbol>`); delete individually (select+Del) or all. Fibonacci draws
-levels 0/0.236/0.382/0.5/0.618/0.786/1 (+ extensions 1.272/1.618 for extension tool).
-Keep it modular: a `tools.ts` registry, a `DrawingLayer.tsx` renderer, a `useDrawings` hook.
-(NOTE: chart technical INDICATORS are intentionally OUT OF SCOPE — do not build them.)
 
 ### StrategyManager (`src/components/StrategyManager.tsx`) + BacktestPanel
 - StrategyManager: list strategies (api.strategies), a Monaco-free code editor (a styled <textarea> with monospace + line highlighting is fine), create/edit/save/delete, start/stop against the active portfolio, live status + logs (via strategyLogs poll or events).

@@ -1,4 +1,4 @@
-/* ChartPanel — lightweight-charts candlestick with drawing overlays. */
+/* ChartPanel — lightweight-charts candlestick chart (read-only, no drawing). */
 .chartpanel {
   position: relative;
   height: 100%;
@@ -13,7 +13,7 @@
 .chart-head {
   position: absolute;
   top: var(--sp-3);
-  left: 56px; /* clear the drawing toolbar */
+  left: var(--sp-3);
   z-index: 15;
   display: flex;
   align-items: center;
@@ -47,12 +47,6 @@
 .chart-mount {
   position: absolute;
   inset: 0;
-}
-/* the DrawingLayer overlay sits above the chart canvas */
-.chart-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
 }
 
 .chart-loading,
