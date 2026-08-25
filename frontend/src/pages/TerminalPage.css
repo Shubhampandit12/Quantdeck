@@ -1,11 +1,11 @@
 /* TerminalPage — TradingView-like CSS grid layout.
-   Rows: topbar (full width) / body / commandbar.
+   Rows: topbar (full width) / body.
    Body columns: left watchlist / center (chart + bottom panel) / right (ticket + summary).
    The layout stays information-dense (it's a trading terminal) but gets rounded
    surfaces, soft hairline seams, and consistent breathing room. */
 .terminal {
   display: grid;
-  grid-template-rows: var(--topbar-h) 1fr auto;
+  grid-template-rows: var(--topbar-h) 1fr;
   height: 100vh;
   width: 100%;
   max-width: 100%;

@@ -73,7 +73,8 @@ never bypass it, and it can never touch real money.
 ## In-app alternative
 
 You don't need MCP to use the AI — the terminal's **AI Session** panel runs the
-same autonomous loop in-app (with guardrails + kill-switch) and the command bar
-does one-off natural-language orders. MCP is for driving it from an external
-Claude client. Both require `ANTHROPIC_API_KEY` for the reasoning model; the MCP
-tools themselves only need the API running.
+same autonomous loop in-app (with guardrails + kill-switch). MCP is for driving
+it from an external Claude client instead. The in-app panel requires
+`ANTHROPIC_API_KEY` for the reasoning model; the MCP tools themselves only need
+the API running — the client (e.g. Claude Desktop) supplies its own reasoning,
+so no key is needed on the QuantDeck side for the MCP path.

@@ -1,4 +1,4 @@
-/* BottomPanel — tabbed positions/orders/history/logs/AI.
+/* BottomPanel — tabbed positions/orders/AI.
    Rounded tab pills, comfortable table rows, and a clean sticky header. */
 .bottompanel {
   display: flex;
@@ -120,21 +120,4 @@
 .side-sell {
   color: var(--down);
   font-weight: 600;
-}
-
-/* logs */
-.bp-logs {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  padding: var(--sp-4) var(--sp-5);
-  line-height: 1.7;
-}
-.bp-log-line {
-  color: var(--text-1);
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-.bp-log-ts {
-  color: var(--text-2);
-  margin-right: var(--sp-2);
 }

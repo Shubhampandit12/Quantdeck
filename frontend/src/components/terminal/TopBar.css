@@ -47,54 +47,6 @@
   flex: 1;
 }
 
-/* symbol search — the flexible element that gives up width when space is tight */
-.topbar-search {
-  position: relative;
-  width: 224px;
-  min-width: 90px;
-  flex: 0 1 224px;
-}
-.topbar-search .input {
-  padding: 8px 14px;
-  border-radius: var(--radius-pill);
-  background: var(--bg-0);
-}
-.topbar-results {
-  position: absolute;
-  top: calc(100% + var(--sp-2));
-  left: 0;
-  right: 0;
-  z-index: 40;
-  max-height: 340px;
-  overflow-y: auto;
-  padding: var(--sp-1);
-  background: var(--bg-2);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
-}
-.topbar-result {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--sp-2);
-  padding: 9px 12px;
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-}
-.topbar-result:hover {
-  background: var(--bg-3);
-}
-.topbar-result .sym {
-  font-weight: 600;
-}
-.topbar-result .nm {
-  color: var(--text-2);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 120px;
-}
-
 /* asset-class + timeframe pill groups — rounded, softly filled active state */
 .pill-group {
   display: inline-flex;
@@ -128,18 +80,7 @@
   background: var(--accent-hover);
 }
 
-/* portfolio switcher */
-.topbar-pf {
-  position: relative;
-}
-.topbar-pf .input {
-  width: auto;
-  min-width: 160px;
-  border-radius: var(--radius-pill);
-  padding: 8px 14px;
-}
-
-/* leverage / balances — label above value, tight vertical rhythm */
+/* balances — label above value, tight vertical rhythm */
 .topbar-stat {
   display: flex;
   flex-direction: column;
@@ -161,7 +102,7 @@
   font-weight: 600;
   color: var(--text-0);
 }
-/* Clickable stats (Cash / Leverage) read as interactive chips. */
+/* Clickable stats (Cash) read as interactive chips. */
 .topbar-lev {
   cursor: pointer;
   border: 1px solid transparent;

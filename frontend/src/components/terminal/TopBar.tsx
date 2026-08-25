@@ -1,11 +1,14 @@
-// TopBar — full-width terminal header: search, timeframe, portfolio
-// switcher (+ New / Reset), leverage editor, balance/equity, connection dot, PAPER badge.
-import { useEffect, useRef, useState } from "react";
+// TopBar — full-width terminal header: timeframe, Reset, balance/equity,
+// connection dot, PAPER badge. No portfolio switcher or "New" (the app
+// auto-creates one "Default" portfolio; this is a single-portfolio demo),
+// no manual leverage editor (fixed at 1x — the AI/MCP/strategy path can
+// still set leverage via api.setLeverage, unchanged), no top-bar symbol
+// search (use the Watchlist's own filter).
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import "./TopBar.css";
 import { api, ApiError } from "../../api/client";
 import { useStore } from "../../state/store";
-import type { SymbolInfo } from "../../api/types";
 import { fmtUsd, signClass, fmtSigned } from "../../lib/format";
 import type { Timeframe } from "../../pages/TerminalPage";
 
@@ -14,52 +17,17 @@ const TIMEFRAMES: Timeframe[] = ["1m", "5m", "15m", "1h", "4h", "1d", "1w"];
 interface Props {
   timeframe: Timeframe;
   onTimeframe: (tf: Timeframe) => void;
-  onSelectSymbol: (sym: string) => void;
   connected: boolean;
 }
 
-export default function TopBar({ timeframe, onTimeframe, onSelectSymbol, connected }: Props) {
-  const portfolios = useStore((s) => s.portfolios);
-  const activePortfolioId = useStore((s) => s.activePortfolioId);
-  const setActivePortfolio = useStore((s) => s.setActivePortfolio);
+export default function TopBar({ timeframe, onTimeframe, connected }: Props) {
   const snapshot = useStore((s) => s.snapshot);
-  const loadPortfolios = useStore((s) => s.loadPortfolios);
   const refreshSnapshot = useStore((s) => s.refreshSnapshot);
 
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SymbolInfo[]>([]);
-  const [showResults, setShowResults] = useState(false);
-  const [showNew, setShowNew] = useState(false);
   const [showReset, setShowReset] = useState(false);
-  const [showLev, setShowLev] = useState(false);
   const [showBalance, setShowBalance] = useState(false);
 
   const pf = snapshot?.portfolio;
-
-  // Debounced symbol search.
-  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => {
-    if (!query.trim()) {
-      setResults([]);
-      return;
-    }
-    if (searchTimer.current) clearTimeout(searchTimer.current);
-    searchTimer.current = setTimeout(async () => {
-      try {
-        const r = await api.search(query.trim(), 20);
-        setResults(r);
-      } catch {
-        setResults([]);
-      }
-    }, 200);
-  }, [query]);
-
-  function pick(sym: string) {
-    onSelectSymbol(sym);
-    setQuery("");
-    setResults([]);
-    setShowResults(false);
-  }
 
   return (
     <header className="topbar">
@@ -68,31 +36,6 @@ export default function TopBar({ timeframe, onTimeframe, onSelectSymbol, connect
       </Link>
 
       <div className="topbar-sep" />
-
-      {/* symbol search */}
-      <div className="topbar-search">
-        <input
-          className="input"
-          placeholder="Search symbol…"
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setShowResults(true);
-          }}
-          onFocus={() => setShowResults(true)}
-          onBlur={() => setTimeout(() => setShowResults(false), 150)}
-        />
-        {showResults && results.length > 0 && (
-          <div className="topbar-results">
-            {results.map((r) => (
-              <div key={r.symbol} className="topbar-result" onMouseDown={() => pick(r.symbol)}>
-                <span className="sym">{r.symbol}</span>
-                <span className="nm">{r.name}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
       {/* timeframe selector */}
       <div className="pill-group">
@@ -109,37 +52,11 @@ export default function TopBar({ timeframe, onTimeframe, onSelectSymbol, connect
 
       <div className="topbar-spacer" />
 
-      {/* portfolio switcher */}
-      <div className="topbar-pf">
-        <select
-          className="input"
-          value={activePortfolioId ?? ""}
-          onChange={(e) => {
-            if (e.target.value) void setActivePortfolio(e.target.value);
-          }}
-        >
-          {portfolios.length === 0 && <option value="">No portfolios</option>}
-          {portfolios.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <button className="btn" onClick={() => setShowNew(true)}>
-        New
-      </button>
-      <button className="btn" onClick={() => setShowReset(true)} disabled={!activePortfolioId}>
+      <button className="btn" onClick={() => setShowReset(true)} disabled={!pf}>
         Reset
       </button>
 
       <div className="topbar-sep" />
-
-      {/* leverage */}
-      <div className="topbar-stat topbar-lev" onClick={() => pf && setShowLev(true)}>
-        <span className="lbl">Leverage</span>
-        <span className="val">{pf ? `${pf.leverage}x` : "—"}</span>
-      </div>
 
       {/* balance / equity — click Cash to change your demo balance */}
       <div
@@ -163,20 +80,9 @@ export default function TopBar({ timeframe, onTimeframe, onSelectSymbol, connect
 
       <div className="topbar-sep" />
 
-      {/* connection dot + PAPER badge */}
+      {/* connection dot */}
       <div className={`conn-dot ${connected ? "on" : ""}`} title={connected ? "Live" : "Disconnected"} />
-      <span className="badge badge-demo">Paper · Demo</span>
 
-      {showNew && (
-        <NewPortfolioModal
-          onClose={() => setShowNew(false)}
-          onCreated={async (id) => {
-            await loadPortfolios();
-            await setActivePortfolio(id);
-            setShowNew(false);
-          }}
-        />
-      )}
       {showReset && pf && (
         <ResetPortfolioModal
           id={pf.id}
@@ -185,17 +91,6 @@ export default function TopBar({ timeframe, onTimeframe, onSelectSymbol, connect
           onDone={async () => {
             await refreshSnapshot();
             setShowReset(false);
-          }}
-        />
-      )}
-      {showLev && pf && (
-        <LeverageModal
-          id={pf.id}
-          current={pf.leverage}
-          onClose={() => setShowLev(false)}
-          onDone={async () => {
-            await refreshSnapshot();
-            setShowLev(false);
           }}
         />
       )}
@@ -215,83 +110,6 @@ export default function TopBar({ timeframe, onTimeframe, onSelectSymbol, connect
 }
 
 // --- Modals -------------------------------------------------------------
-
-function NewPortfolioModal({
-  onClose,
-  onCreated,
-}: {
-  onClose: () => void;
-  onCreated: (id: string) => void;
-}) {
-  const [name, setName] = useState("My Paper Portfolio");
-  const [balance, setBalance] = useState(100000);
-  const [leverage, setLeverage] = useState(1);
-  const [fillMode, setFillMode] = useState("realistic");
-  const [err, setErr] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-
-  async function submit() {
-    setBusy(true);
-    setErr(null);
-    try {
-      const p = await api.createPortfolio({
-        name: name.trim() || "Paper Portfolio",
-        starting_balance: balance,
-        leverage,
-        fill_mode: fillMode,
-      });
-      onCreated(p.id);
-    } catch (e) {
-      setErr(e instanceof ApiError ? e.message : "Failed to create portfolio");
-      setBusy(false);
-    }
-  }
-
-  return (
-    <ModalShell title="New paper portfolio" onClose={onClose}>
-      {err && <div className="modal-err">{err}</div>}
-      <div className="modal-row">
-        <label>Name</label>
-        <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
-      </div>
-      <div className="modal-row">
-        <label>Starting balance (USD)</label>
-        <input
-          className="input"
-          type="number"
-          value={balance}
-          onChange={(e) => setBalance(Number(e.target.value))}
-        />
-      </div>
-      <div className="modal-row">
-        <label>Leverage</label>
-        <input
-          className="input"
-          type="number"
-          min={1}
-          max={100}
-          value={leverage}
-          onChange={(e) => setLeverage(Number(e.target.value))}
-        />
-      </div>
-      <div className="modal-row">
-        <label>Fill mode</label>
-        <select className="input" value={fillMode} onChange={(e) => setFillMode(e.target.value)}>
-          <option value="realistic">Realistic</option>
-          <option value="idealized">Idealized</option>
-        </select>
-      </div>
-      <div className="modal-actions">
-        <button className="btn" onClick={onClose}>
-          Cancel
-        </button>
-        <button className="btn btn-primary" onClick={submit} disabled={busy}>
-          {busy ? "Creating…" : "Create"}
-        </button>
-      </div>
-    </ModalShell>
-  );
-}
 
 function ResetPortfolioModal({
   id,
@@ -341,59 +159,6 @@ function ResetPortfolioModal({
         </button>
         <button className="btn btn-primary" onClick={submit} disabled={busy}>
           {busy ? "Resetting…" : "Reset"}
-        </button>
-      </div>
-    </ModalShell>
-  );
-}
-
-function LeverageModal({
-  id,
-  current,
-  onClose,
-  onDone,
-}: {
-  id: string;
-  current: number;
-  onClose: () => void;
-  onDone: () => void;
-}) {
-  const [lev, setLev] = useState(current);
-  const [err, setErr] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-
-  async function submit() {
-    setBusy(true);
-    setErr(null);
-    try {
-      await api.setLeverage(id, lev);
-      onDone();
-    } catch (e) {
-      setErr(e instanceof ApiError ? e.message : "Failed to set leverage");
-      setBusy(false);
-    }
-  }
-
-  return (
-    <ModalShell title="Set leverage" onClose={onClose}>
-      {err && <div className="modal-err">{err}</div>}
-      <div className="modal-row">
-        <label>Leverage (x)</label>
-        <input
-          className="input"
-          type="number"
-          min={1}
-          max={100}
-          value={lev}
-          onChange={(e) => setLev(Number(e.target.value))}
-        />
-      </div>
-      <div className="modal-actions">
-        <button className="btn" onClick={onClose}>
-          Cancel
-        </button>
-        <button className="btn btn-primary" onClick={submit} disabled={busy}>
-          {busy ? "Saving…" : "Save"}
         </button>
       </div>
     </ModalShell>

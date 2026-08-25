@@ -1,9 +1,9 @@
-"""Offline market-data tests: classification, the S&P 500 loader, and the
-service's symbol listing — all without touching the network.
+"""Offline market-data tests: classification, the demo symbol universe, and
+the service's symbol listing — all without touching the network.
 
-``load_sp500`` must ship an embedded static fallback of >=100 well-known S&P 500
-tickers so it works with no connectivity. ``get_symbols`` must be servable from
-that list, again offline.
+``load_sp500`` (name kept for minimal churn) ships a fixed, curated 15-symbol
+demo universe with no network dependency. ``get_symbols`` must be servable
+from that list, again offline.
 """
 from __future__ import annotations
 
@@ -28,17 +28,18 @@ def test_normalize_symbol():
 
 
 # --------------------------------------------------------------------------- #
-# S&P 500 loader — offline static fallback                                    #
+# Demo symbol universe — fixed 15-symbol static list                          #
 # --------------------------------------------------------------------------- #
-def test_load_sp500_returns_at_least_100():
-    from quantdeck.marketdata.sp500 import load_sp500
+def test_load_sp500_returns_fixed_demo_universe():
+    from quantdeck.marketdata.sp500 import DEMO_SYMBOLS, load_sp500
 
     syms = load_sp500()
     assert isinstance(syms, list)
-    assert len(syms) >= 100
+    assert len(syms) == 15
+    assert len(DEMO_SYMBOLS) == 15
 
     # Every entry is a well-formed US-equity SymbolInfo.
-    for s in syms[:10]:
+    for s in syms:
         assert isinstance(s, SymbolInfo)
         assert s.asset_class == AssetClass.US_EQUITY
         assert s.symbol == s.symbol.upper()
@@ -47,8 +48,9 @@ def test_load_sp500_returns_at_least_100():
     # No duplicate tickers.
     tickers = [s.symbol for s in syms]
     assert len(tickers) == len(set(tickers))
+    assert tickers == list(DEMO_SYMBOLS)
 
-    # A few household names should be present in any real S&P 500 list.
+    # A few household names should be present in the demo universe.
     assert "AAPL" in set(tickers)
     assert "MSFT" in set(tickers)
 
@@ -74,7 +76,7 @@ async def test_service_constructs_and_lists_symbols_offline():
         pytest.skip(f"get_symbols(US_EQUITY) required connectivity: {exc!r}")
 
     assert isinstance(equities, list)
-    assert len(equities) >= 100
+    assert len(equities) == 15
     assert all(e.asset_class == AssetClass.US_EQUITY for e in equities)
 
     # A second call should be cache-fast and return a consistent count.

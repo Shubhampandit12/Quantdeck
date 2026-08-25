@@ -30,14 +30,23 @@ Resembles TradingView home:
 - No watchlist preview and no features grid on this page — the terminal (`/terminal`) and backtest (`/backtest`) CTAs above are the only other entry points.
 
 ### TerminalPage (`src/pages/TerminalPage.tsx` + css) — the full terminal
+
+The manual UI here is deliberately minimal — QuantDeck's point is the AI/MCP
+path, not a full manual brokerage terminal. The engine, `api.setLeverage`,
+the MCP `place_order` tool, and the Python Strategy SDK all still support
+limit/stop orders, leverage, and TP/SL unchanged; only this manual form and
+its TopBar controls are trimmed. Single portfolio only — the app auto-creates
+one "Default" portfolio on startup (`api/deps.py::_ensure_default_portfolio`),
+so there's no portfolio switcher or "New" button.
+
 Grid layout (TradingView-like):
-- TopBar (own component): symbol search, timeframe selector (1m/5m/15m/1h/4h/1d/1w), portfolio switcher (dropdown of portfolios + "New" + "Reset"), leverage display + editor, balance/equity display, connection status dot, PAPER/DEMO badge.
-- Left panel: `Watchlist` component showing the S&P 500 from api.symbols('us_equity'), searchable, live prices; click selects symbol.
+- TopBar (own component): timeframe selector (1m/5m/15m/1h/4h/1d/1w), "Reset" (clears positions/orders, resets cash), balance/equity display (click Cash to change the demo balance), connection status dot, PAPER/DEMO badge. No portfolio switcher, no "New", no leverage editor, no top-bar symbol search (use the Watchlist's own filter).
+- Left panel: `Watchlist` component showing the fixed 15-symbol demo universe from api.symbols('us_equity') (`marketdata/sp500.py::DEMO_SYMBOLS`), searchable, live prices; click selects symbol.
 - Center: `ChartPanel` — lightweight-charts candlestick, loads api.ohlcv on symbol/interval change, updates last candle from live quotes (openMarketSocket). Shows data source + delay label (badge-rt / badge-delayed from quote.source/quote.delay). Read-only: zoom (scroll/pinch) and pan (drag) via handleScroll/handleScale, but no drawing tools — there is no toolbar and nothing on the chart is user-editable.
-- Right panel: `OrderTicket` — side (buy/sell), type (market/limit/stop/stop_limit), qty, price/stop fields, leverage selector, TP/SL, submit → api.placeOrder; show buying power, margin used, and estimated liquidation. Below it a compact `PortfolioSummary` (cash, equity, unrealized pnl, realized pnl).
-- Bottom panel: tabbed `Positions | Open Orders | Trade History | Strategy Logs | AI Session`. Positions table (symbol, side, qty, avg, last, uPnL, liq price, close btn). Open orders (cancel btn). History (fills). Strategy logs stream. AI session trace stream.
+- Right panel: `OrderTicket` — side (Buy/Long, Sell/Short) + quantity only, always a market order, submit → api.placeOrder; shows buying power and margin used, plus the real open position for the selected symbol (qty, avg entry, last, market value, uPnL, liq. price) when one exists. Below it a compact `PortfolioSummary` (cash, equity, unrealized pnl, realized pnl).
+- Bottom panel: tabbed `Positions | Open Orders | AI Session`. Positions table (symbol, side, qty, avg, last, uPnL, liq price, close btn). Open orders (cancel btn). AI session trace stream. (No Trade History or Strategy Logs tabs in this UI.)
 - Command bar (bottom): a single input that does natural-language order entry / AI chat → api.aiChat; render the reply + trace.
-- Live updates: subscribe openEventSocket(activePortfolioId) → on order/position/portfolio events call store.refreshSnapshot() (debounced) and append to logs/trace.
+- Live updates: subscribe openEventSocket(activePortfolioId) → on order/position/portfolio events call store.refreshSnapshot() (debounced).
 
 ### StrategyManager (`src/components/StrategyManager.tsx`) + BacktestPanel
 - StrategyManager: list strategies (api.strategies), a Monaco-free code editor (a styled <textarea> with monospace + line highlighting is fine), create/edit/save/delete, start/stop against the active portfolio, live status + logs (via strategyLogs poll or events).

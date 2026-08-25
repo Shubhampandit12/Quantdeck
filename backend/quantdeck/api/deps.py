@@ -17,7 +17,9 @@ import logging
 from typing import Optional
 
 from ..core.config import settings
+from ..core.models import RiskLimits
 from ..marketdata.service import MarketDataService, get_market_data as _get_md
+from ..marketdata.sp500 import DEMO_SYMBOLS
 from ..engine.engine import TradingEngine
 from ..strategies.runner import StrategyManager
 from ..backtest.engine import Backtester
@@ -121,11 +123,16 @@ async def _ensure_default_portfolio() -> None:
         _default_portfolio_id = existing[0].id
         return
 
+    # The demo's one portfolio is scoped to the fixed 15-symbol universe —
+    # this is a per-portfolio RiskLimits, not the shared model default, so it
+    # doesn't affect tests, the backtester, or AI-session guardrails, which
+    # all construct their own RiskLimits independently.
     portfolio = await _engine.create_portfolio(
         name="Default",
         starting_balance=settings.default_starting_balance,
         leverage=settings.default_leverage,
         fill_mode=settings.default_fill_mode,
+        risk_limits=RiskLimits(allowed_symbols=list(DEMO_SYMBOLS)),
     )
     _default_portfolio_id = portfolio.id
 

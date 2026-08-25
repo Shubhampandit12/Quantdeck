@@ -43,37 +43,6 @@
   box-shadow: 0 6px 18px var(--down-bg);
 }
 
-/* Order type — rounded segmented control on a soft track. */
-.ticket-types {
-  display: flex;
-  gap: 3px;
-  margin-bottom: var(--sp-4);
-  padding: 3px;
-  background: var(--bg-0);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-.ticket-types button {
-  flex: 1;
-  padding: 8px 0;
-  font-size: 11px;
-  font-weight: 600;
-  border: none;
-  background: transparent;
-  color: var(--text-1);
-  border-radius: var(--radius-sm);
-  transition: background 0.16s ease, color 0.16s ease;
-}
-.ticket-types button:hover {
-  color: var(--text-0);
-  background: var(--bg-2);
-}
-.ticket-types button.active {
-  background: var(--bg-3);
-  color: var(--text-0);
-  box-shadow: var(--shadow-sm);
-}
-
 .ticket-field {
   margin-bottom: var(--sp-4);
 }
@@ -87,66 +56,7 @@
   margin-bottom: var(--sp-2);
 }
 
-.ticket-grid2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--sp-3);
-}
-
-/* Leverage quick-select buttons + custom input. */
-.ticket-lev {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-2);
-  align-items: center;
-}
-.ticket-lev-btn {
-  flex: 1 1 auto;
-  min-width: 38px;
-  padding: 8px 0;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-1);
-  background: var(--bg-0);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-pill);
-  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
-}
-.ticket-lev-btn:hover {
-  background: var(--bg-3);
-  color: var(--text-0);
-}
-.ticket-lev-btn.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(59, 123, 255, 0.3);
-}
-.ticket-lev-input {
-  width: 60px;
-  flex: 0 0 auto;
-  padding: 8px 10px;
-  border-radius: var(--radius-pill);
-  text-align: center;
-}
-
-.ticket-toggle-row {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  font-size: 12px;
-  color: var(--text-1);
-  margin-bottom: var(--sp-3);
-  cursor: pointer;
-}
-.ticket-toggle-row input[type="checkbox"] {
-  width: 15px;
-  height: 15px;
-  accent-color: var(--accent);
-  cursor: pointer;
-}
-
-/* Estimate block — set apart on a soft rounded surface. */
+/* Account-state block — set apart on a soft rounded surface. */
 .ticket-info {
   margin: var(--sp-4) 0;
   padding: var(--sp-3) var(--sp-4);
@@ -189,4 +99,36 @@
 .ticket-msg.ok {
   background: var(--up-bg);
   color: var(--up);
+}
+
+/* Real open position for the selected symbol, shown below the form. */
+.ticket-position {
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--border);
+}
+.ticket-position-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-2);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.ticket-position-side {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+.ticket-position-side.side-long {
+  background: var(--up-bg);
+  color: var(--up);
+}
+.ticket-position-side.side-short {
+  background: var(--down-bg);
+  color: var(--down);
 }

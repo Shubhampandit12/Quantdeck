@@ -1,6 +1,6 @@
 // TerminalPage — the full trading terminal.
 // Owns: selected symbol (from route), timeframe state, and the live event stream
-// that keeps the portfolio snapshot fresh and feeds strategy/AI logs to the bottom panel.
+// that keeps the portfolio snapshot fresh (positions/orders/portfolio events).
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./TerminalPage.css";
@@ -13,18 +13,8 @@ import ChartPanel from "../components/terminal/ChartPanel";
 import OrderTicket from "../components/terminal/OrderTicket";
 import PortfolioSummary from "../components/terminal/PortfolioSummary";
 import BottomPanel from "../components/terminal/BottomPanel";
-import CommandBar from "../components/terminal/CommandBar";
 
 export type Timeframe = "1m" | "5m" | "15m" | "1h" | "4h" | "1d" | "1w";
-
-// A single line rendered in the bottom panel's log tabs.
-export interface LogLine {
-  id: number;
-  ts: string;
-  text: string;
-}
-
-let _logId = 0;
 
 export default function TerminalPage() {
   const { symbol } = useParams();
@@ -37,7 +27,6 @@ export default function TerminalPage() {
   const activePortfolioId = useStore((s) => s.activePortfolioId);
 
   const [timeframe, setTimeframe] = useState<Timeframe>("1h");
-  const [strategyLogs, setStrategyLogs] = useState<LogLine[]>([]);
   const [connected, setConnected] = useState(false);
 
   // Decode the route symbol and sync it into the store.
@@ -63,14 +52,6 @@ export default function TerminalPage() {
     [navigate, setSelectedSymbol],
   );
 
-  const appendLog = useCallback((text: string) => {
-    setStrategyLogs((prev) => {
-      const next = [...prev, { id: _logId++, ts: new Date().toISOString(), text }];
-      // Keep the log buffer bounded.
-      return next.length > 500 ? next.slice(next.length - 500) : next;
-    });
-  }, []);
-
   // Debounced snapshot refresh so a burst of events triggers a single fetch.
   const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const debouncedRefresh = useCallback(() => {
@@ -86,15 +67,13 @@ export default function TerminalPage() {
     setConnected(false);
     const sock = openEventSocket(activePortfolioId, (e: MarketEvent) => {
       setConnected(true);
-      handleEvent(e, debouncedRefresh, appendLog);
+      handleEvent(e, debouncedRefresh);
     });
     return () => {
       sock.close();
       setConnected(false);
     };
-  }, [activePortfolioId, debouncedRefresh, appendLog]);
-
-  const clearLogs = useCallback(() => setStrategyLogs([]), []);
+  }, [activePortfolioId, debouncedRefresh]);
 
   const centerChart = useMemo(
     () => <ChartPanel symbol={selectedSymbol} interval={timeframe} />,
@@ -103,12 +82,7 @@ export default function TerminalPage() {
 
   return (
     <div className="terminal">
-      <TopBar
-        timeframe={timeframe}
-        onTimeframe={setTimeframe}
-        onSelectSymbol={selectSymbol}
-        connected={connected}
-      />
+      <TopBar timeframe={timeframe} onTimeframe={setTimeframe} connected={connected} />
 
       <div className="terminal-body">
         <aside className="terminal-left">
@@ -118,7 +92,7 @@ export default function TerminalPage() {
         <section className="terminal-center">
           <div className="terminal-center-chart">{centerChart}</div>
           <div className="terminal-center-bottom">
-            <BottomPanel strategyLogs={strategyLogs} onClearLogs={clearLogs} />
+            <BottomPanel />
           </div>
         </section>
 
@@ -127,19 +101,13 @@ export default function TerminalPage() {
           <PortfolioSummary />
         </aside>
       </div>
-
-      <CommandBar />
     </div>
   );
 }
 
-// Route an incoming event: refresh snapshot on state-changing events and forward
-// strategy/AI text lines to the bottom panel logs.
-function handleEvent(
-  e: MarketEvent,
-  refresh: () => void,
-  appendLog: (t: string) => void,
-) {
+// Route an incoming event: refresh the snapshot on any state-changing event
+// so Positions/Open Orders/balances stay live.
+function handleEvent(e: MarketEvent, refresh: () => void) {
   const t = e.type;
   if (
     t === "order" ||
@@ -150,17 +118,5 @@ function handleEvent(
     t === "fill"
   ) {
     refresh();
-  }
-  if (t === "strategy_log" || t === "strategy_status") {
-    const msg = (e.data?.message ?? e.data?.line ?? e.data?.status) as string | undefined;
-    if (msg) appendLog(`[strategy] ${msg}`);
-  }
-  if (t === "ai_trace" || t === "ai_status") {
-    const step = e.data as Record<string, unknown>;
-    const text = (step.text ?? step.status ?? step.tool) as string | undefined;
-    if (text) appendLog(`[ai] ${text}`);
-  }
-  if (t === "liquidation") {
-    appendLog(`[liquidation] ${JSON.stringify(e.data)}`);
   }
 }
