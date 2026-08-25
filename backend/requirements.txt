@@ -13,7 +13,7 @@ numpy>=1.26
 pandas>=2.2
 yfinance>=0.2.40
 anthropic>=0.39
-mcp>=1.2.0
+mcp>=1.2.0,<2.0.0  # 2.x removed the Server.list_tools()/call_tool() decorator API mcp_server/server.py uses
 # Test suite
 pytest>=8.0
 pytest-asyncio>=0.23
