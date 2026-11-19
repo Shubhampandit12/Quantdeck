@@ -28,9 +28,6 @@ export default function StrategiesPage() {
           Quant<span className="qd-logo-accent">Deck</span>
         </Link>
         <div className="qd-nav-links">
-          <NavLink to="/" end className="qd-nav-link">
-            Markets
-          </NavLink>
           <NavLink to="/terminal/AAPL" className="qd-nav-link">
             Charts
           </NavLink>
