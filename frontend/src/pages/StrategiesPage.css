@@ -51,9 +51,9 @@
   align-items: center;
   gap: 12px;
 }
-.qd-portfolio-select {
-  width: auto;
-  min-width: 140px;
+.qd-demo-badge {
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
 }
 
 /* ---- Page header ---- */
@@ -69,14 +69,6 @@
   margin: 0;
   font-size: 20px;
   font-weight: 700;
-}
-.strat-page-sub {
-  margin: 4px 0 0;
-  font-size: 13px;
-  max-width: 640px;
-}
-.strat-page-sub strong {
-  color: var(--text-0);
 }
 
 /* ---- Body ---- */
