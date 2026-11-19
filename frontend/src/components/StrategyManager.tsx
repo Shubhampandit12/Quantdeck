@@ -8,29 +8,83 @@ import { openEventSocket } from "../api/ws";
 import type { MarketEvent, StrategySummary } from "../api/types";
 import "./StrategyManager.css";
 
-// Helpful starter shown when authoring a brand-new strategy. The runtime calls
-// `on_bar(ctx, bar)` for each bar.
-const EXAMPLE_CODE = `# SMA crossover.
-# ctx exposes: ctx.price(symbol), ctx.position(symbol), ctx.buy(symbol, qty),
-# ctx.sell(symbol, qty), ctx.log(msg), ctx.sma(symbol, period).
-# Fast SMA crossing above slow SMA => go long; crossing below => flatten.
+// Default strategy shown when authoring a brand-new strategy ("Strategy A").
+// It must define a Strategy subclass — that's what the sandbox loader looks for.
+const EXAMPLE_CODE = `# Strategy A — three-candle momentum
+#
+# Idea: three candles in a row of the same colour suggests a short-term trend,
+# so we ride it, and we get out as soon as one candle goes the other way.
+#
+#   * 3 green candles in a row  -> BUY  (go long)
+#       exit: SELL (close the long) on the first red candle that follows
+#   * 3 red candles in a row    -> SELL (go short)
+#       exit: BUY back (close the short) on the first green candle that follows
+#
+# A candle is "green" when it closes above where it opened, and "red" when it
+# closes below. A flat candle (close == open) is neither, so it breaks a streak.
+#
+# Notes:
+#   * Candles are built live from streamed prices at the interval you pick next
+#     to the Start button (e.g. 1m). The strategy needs 3 finished candles
+#     before it can make its first decision.
+#   * Every order goes through the same risk checks as a manual order.
 
-FAST = 10
-SLOW = 30
+from quantdeck.strategies import Strategy
 
-def on_bar(ctx, bar):
-    fast = ctx.sma(bar.symbol, FAST)
-    slow = ctx.sma(bar.symbol, SLOW)
-    if fast is None or slow is None:
-        return  # not enough history yet
+# Fraction of current buying power to put into each new position.
+POSITION_FRACTION = 0.5
 
-    pos = ctx.position(bar.symbol)
-    if fast > slow and pos <= 0:
-        ctx.log(f"{bar.symbol} golden cross {fast:.2f} > {slow:.2f} -> BUY")
-        ctx.buy(bar.symbol, 1)
-    elif fast < slow and pos > 0:
-        ctx.log(f"{bar.symbol} death cross {fast:.2f} < {slow:.2f} -> SELL")
-        ctx.sell(bar.symbol, pos)
+
+def is_green(bar):
+    return bar.close > bar.open
+
+
+def is_red(bar):
+    return bar.close < bar.open
+
+
+class StrategyA(Strategy):
+    name = "Strategy A"
+
+    def on_start(self, ctx):
+        ctx.log("Strategy A started: 3 green -> buy, 3 red -> sell short")
+
+    def on_bar(self, ctx, bar):
+        symbol = bar.symbol
+        pos = ctx.get_position(symbol)
+        side = pos.side.value if pos is not None else "flat"
+
+        # 1) If we hold a position, only look for the exit signal.
+        if side == "long":
+            if is_red(bar):
+                ctx.log(f"{symbol}: red candle -> closing long")
+                ctx.close(symbol)
+            return
+        if side == "short":
+            if is_green(bar):
+                ctx.log(f"{symbol}: green candle -> closing short")
+                ctx.close(symbol)
+            return
+
+        # 2) No position: wait until we have 3 finished candles.
+        last3 = ctx.bars(symbol, 3)
+        if len(last3) < 3:
+            return
+
+        qty = ctx.max_shares(symbol, POSITION_FRACTION)
+        if qty <= 0:
+            return
+
+        # 3) Entry signals.
+        if all(is_green(b) for b in last3):
+            ctx.log(f"{symbol}: 3 green candles -> BUY {qty:.4f}")
+            ctx.buy(symbol, qty)
+        elif all(is_red(b) for b in last3):
+            ctx.log(f"{symbol}: 3 red candles -> SELL SHORT {qty:.4f}")
+            ctx.sell(symbol, qty)
+
+    def on_stop(self, ctx):
+        ctx.log("Strategy A stopped")
 `;
 
 const LOG_POLL_MS = 2000;
@@ -42,7 +96,7 @@ type Draft = {
   code: string;
 };
 
-const NEW_DRAFT: Draft = { id: null, name: "New Strategy", code: EXAMPLE_CODE };
+const NEW_DRAFT: Draft = { id: null, name: "Strategy A", code: EXAMPLE_CODE };
 
 function isRunning(status: string | undefined): boolean {
   return status === "running" || status === "started" || status === "live";
