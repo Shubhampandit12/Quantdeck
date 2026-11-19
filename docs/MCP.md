@@ -13,7 +13,7 @@ never bypass it, and it can never touch real money.
 
 `get_quote`, `get_ohlcv`, `search_symbols`, `get_portfolio`, `get_positions`,
 `get_open_orders`, `get_trade_history`, `place_order`, `cancel_order`,
-`modify_order`, `run_backtest`, `get_market_summary`.
+`modify_order`, `get_market_summary`.
 
 ## Setup
 

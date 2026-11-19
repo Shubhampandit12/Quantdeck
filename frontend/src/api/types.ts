@@ -152,56 +152,6 @@ export interface RiskLimits {
   allowed_symbols?: string[] | null;
 }
 
-export interface EquityPoint {
-  timestamp: string;
-  equity: number;
-}
-
-export interface TradeRecord {
-  symbol: string;
-  side: OrderSide;
-  quantity: number;
-  entry_price: number;
-  exit_price?: number | null;
-  entry_time: string;
-  exit_time?: string | null;
-  pnl: number;
-  return_pct: number;
-}
-
-export interface BacktestRequest {
-  code?: string;
-  strategy_id?: string;
-  symbols: string[];
-  interval: string;
-  start?: string;
-  end?: string;
-  starting_balance: number;
-  leverage: number;
-  fill_mode: string;
-  commission_bps: number;
-  slippage_bps: number;
-  params?: Record<string, unknown>;
-}
-
-export interface BacktestResult {
-  starting_balance: number;
-  ending_balance: number;
-  total_pnl: number;
-  total_return_pct: number;
-  annualized_return_pct?: number | null;
-  max_drawdown_pct: number;
-  sharpe_ratio?: number | null;
-  win_rate: number;
-  num_trades: number;
-  profit_factor?: number | null;
-  equity_curve: EquityPoint[];
-  trades: TradeRecord[];
-  logs: string[];
-  data_warnings: string[];
-  error?: string | null;
-}
-
 export interface StrategySummary {
   id: string;
   name: string;

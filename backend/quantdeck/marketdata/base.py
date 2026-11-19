@@ -1,7 +1,7 @@
 """Market-data provider interface + the MarketDataService contract.
 
 This file is the FROZEN CONTRACT between the market-data layer and everything
-that consumes prices (engine, API, MCP, strategy runtime, backtest). Provider
+that consumes prices (engine, API, MCP, strategy runtime). Provider
 adapters implement `MarketDataProvider`; the rest of the platform only ever
 touches a `MarketDataService` instance (see `.service.get_market_data`).
 """

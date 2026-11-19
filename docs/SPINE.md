@@ -12,8 +12,7 @@ backend/quantdeck/
                    # AISessionStatus, RunMode
     models.py      # Pydantic: SymbolInfo, Quote, Bar, OHLCVResponse, OrderRequest,
                    # Order, Fill, Position, Portfolio, PortfolioSnapshot,
-                   # RiskLimits, Event, BacktestRequest, BacktestResult,
-                   # TradeRecord, EquityPoint ; helper utcnow()
+                   # RiskLimits, Event ; helper utcnow()
     config.py      # settings singleton (get_settings())
     eventbus.py    # `bus` singleton: await bus.publish(Event), bus.publish_soon(e),
                    # async for e in bus.subscribe(portfolio_id=, types=)
@@ -39,15 +38,13 @@ backend/quantdeck/
     sandbox.py     # << BUILD: safe subprocess runner for user code >>
     runner.py      # << BUILD: StrategyManager: start/stop/list, drives live ctx >>
     loader.py      # << BUILD: safely load a Strategy subclass from source code >>
-  backtest/
-    engine.py      # << BUILD: Backtester + BacktestContext (uses Strategy SDK) >>
   ai/
     tools.py       # << BUILD: tool schema + dispatch to engine/marketdata >>
     session.py     # << BUILD: AISessionManager (autonomous loop + manual chat) >>
   api/
     app.py         # << BUILD: create_app(), lifespan, singletons wiring >>
     deps.py        # << BUILD: shared dependency accessors >>
-    routes_*.py    # << BUILD: market, portfolio, order, strategy, backtest, ai >>
+    routes_*.py    # << BUILD: market, portfolio, order, strategy, ai >>
     ws.py          # << BUILD: /ws/market and /ws/events >>
   mcp_server/
     server.py      # << BUILD: standalone MCP server exposing trading tools >>
@@ -80,5 +77,5 @@ Construct once: `TradingEngine(market_data=md)`; expose via api/deps and mcp.
 Place orders with `OrderRequest`; get state with `get_snapshot(portfolio_id)`.
 
 ## The Strategy surface — see strategies/sdk.py
-User code subclasses `Strategy`, uses `ctx` (a `StrategyContext`). Live and
-backtest both provide a `StrategyContext`, so the same file runs in both.
+User code subclasses `Strategy`, uses `ctx` (a `StrategyContext`) provided by
+the live runtime.

@@ -7,9 +7,9 @@ trades a simple reversion rule:
   * exit when RSI recovers above an exit threshold (default 55), OR when price
     drops through a protective percentage stop below the entry.
 
-Like every example, it speaks only the ``StrategyContext`` (``ctx``) surface so
-it runs identically live and in backtest, and it is sandbox-safe (no imports of
-os/sys/etc., no file or network IO, no dunder access).
+Like every example, it speaks only the ``StrategyContext`` (``ctx``) surface and
+is sandbox-safe (no imports of os/sys/etc., no file or network IO, no dunder
+access).
 
 Parameters (read via ``ctx.param``):
   * ``period``     RSI lookback window (default 14)

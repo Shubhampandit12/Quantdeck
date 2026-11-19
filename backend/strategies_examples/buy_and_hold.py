@@ -4,8 +4,7 @@ On the first bar it sees, it deploys a fraction of buying power into the target
 symbol and then does nothing else, holding the position for the rest of the run.
 Useful as a baseline benchmark to compare more active strategies against.
 
-Only the ``StrategyContext`` surface is used, so it runs unchanged live and in
-backtest and passes the sandbox AST scan.
+Only the ``StrategyContext`` surface is used, so it passes the sandbox AST scan.
 
 Parameters (read via ``ctx.param``):
   * ``symbol``    symbol to buy and hold (default "AAPL")

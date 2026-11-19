@@ -189,22 +189,6 @@ async def _dispatch_over_rest(
             json=body,
         )
 
-    if name == "run_backtest":
-        body = {
-            "code": args.get("code"),
-            "strategy_id": args.get("strategy_id"),
-            "symbols": args.get("symbols", []),
-            "interval": args.get("interval", "1d"),
-            "start": args.get("start"),
-            "end": args.get("end"),
-            "starting_balance": args.get("starting_balance", 100_000.0),
-            "leverage": args.get("leverage", 1.0),
-            "commission_bps": args.get("commission_bps", 0.0),
-            "slippage_bps": args.get("slippage_bps", 0.0),
-            "params": args.get("params") or {},
-        }
-        return await _call_api(client, "POST", "/api/backtest", json=body)
-
     return {"error": f"unknown tool: {name}"}
 
 

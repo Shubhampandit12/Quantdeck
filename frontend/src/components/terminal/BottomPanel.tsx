@@ -1,6 +1,6 @@
 // BottomPanel — tabbed Positions | Open Orders | AI Session. (Trade History
 // and Strategy Logs are intentionally not shown here — this UI stays
-// minimal; nothing about backtesting or MCP/AI capability depends on them.)
+// minimal; nothing about MCP/AI capability depends on them.)
 import { useCallback, useState } from "react";
 import "./BottomPanel.css";
 import { api } from "../../api/client";

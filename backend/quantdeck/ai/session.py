@@ -3,7 +3,7 @@
 Two modes, one toolbox (``ai.tools``):
 
 * **chat(portfolio_id, message)** — a single agentic loop. The model may call
-  tools (quotes, history, place_order, backtest, ...) up to
+  tools (quotes, history, place_order, ...) up to
   ``settings.ai_max_steps`` times, then returns a natural-language ``reply`` plus
   a structured ``trace`` of every thought / tool call / tool result. Ideal for
   "buy 10 AAPL" or "how is my portfolio doing?".
@@ -43,7 +43,7 @@ _SYSTEM_PROMPT = (
     "You are QuantDeck's AI trading copilot operating on a PAPER-TRADING "
     "account with DEMO MONEY ONLY — no real funds are ever at risk and no real "
     "broker exists. You have tools to read market data and portfolio state and "
-    "to place, cancel, and modify orders, and to run backtests. Always base "
+    "to place, cancel, and modify orders. Always base "
     "decisions on real data you fetch via tools; never invent prices. When you "
     "place an order it goes through a risk-check path and may come back "
     "REJECTED with a reason — read the reason and adapt. Be concise and explain "
@@ -98,10 +98,9 @@ class _Session:
 class AISessionManager:
     """Owns manual chat and the pool of autonomous trading sessions."""
 
-    def __init__(self, engine, market_data, backtester) -> None:
+    def __init__(self, engine, market_data) -> None:
         self.engine = engine
         self.market_data = market_data
-        self.backtester = backtester
         self._sessions: dict[str, _Session] = {}
         self._client = None  # lazily-created AsyncAnthropic
 
@@ -216,7 +215,6 @@ class AISessionManager:
                     tool_args,
                     engine=self.engine,
                     market_data=self.market_data,
-                    backtester=self.backtester,
                     portfolio_id=portfolio_id,
                 )
                 trace.append(
@@ -483,7 +481,6 @@ class AISessionManager:
             tool_args,
             engine=self.engine,
             market_data=self.market_data,
-            backtester=self.backtester,
             portfolio_id=session.portfolio_id,
         )
 

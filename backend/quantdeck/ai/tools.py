@@ -8,8 +8,8 @@ can take. It exposes two things:
   descriptions, and input schemas so the LLM sees an identical toolbox whether
   it is driven in-process (``ai/session.py``) or over stdio via MCP.
 
-* ``dispatch(name, args, ...)`` — executes a tool call against the live engine,
-  market-data service, and backtester. Every mutation flows through the same
+* ``dispatch(name, args, ...)`` — executes a tool call against the live engine
+  and market-data service. Every mutation flows through the same
   objects the REST API and strategy runtime use, so the AI cannot bypass the
   shared risk-check path.
 
@@ -31,7 +31,7 @@ from typing import Any
 
 from ..core.enums import AssetClass, OrderSide, OrderType, TimeInForce
 from ..core.errors import DataUnavailableError, QuantDeckError
-from ..core.models import BacktestRequest, OrderRequest
+from ..core.models import OrderRequest
 
 # --------------------------------------------------------------------------- #
 # Tool schemas                                                                #
@@ -197,32 +197,6 @@ def tool_specs() -> list[dict]:
             },
         },
         {
-            "name": "run_backtest",
-            "description": (
-                "Backtest a Strategy SDK source file over historical data and "
-                "return P&L-first performance metrics. Use to validate an idea "
-                "before trading it live. Provide 'code' (Python strategy source) "
-                "OR 'strategy_id' referencing a saved strategy."
-            ),
-            "input_schema": {
-                "type": "object",
-                "properties": {
-                    "code": {"type": "string", "description": "Strategy SDK source code."},
-                    "strategy_id": {"type": "string"},
-                    "symbols": {"type": "array", "items": {"type": "string"}},
-                    "interval": {"type": "string", "default": "1d"},
-                    "start": {"type": "string"},
-                    "end": {"type": "string"},
-                    "starting_balance": {"type": "number", "default": 100000.0},
-                    "leverage": {"type": "number", "default": 1.0},
-                    "commission_bps": {"type": "number", "default": 0.0},
-                    "slippage_bps": {"type": "number", "default": 0.0},
-                    "params": {"type": "object"},
-                },
-                "required": ["symbols"],
-            },
-        },
-        {
             "name": "get_market_summary",
             "description": (
                 "Get a broad market snapshot: top movers up/down plus a handful "
@@ -255,7 +229,6 @@ async def dispatch(
     *,
     engine,
     market_data,
-    backtester,
     portfolio_id: str,
 ) -> dict:
     """Execute one tool call and return a JSON-serializable result dict.
@@ -266,7 +239,7 @@ async def dispatch(
         The tool name (must be one of ``TOOL_NAMES``).
     args:
         The tool arguments as provided by the model (already parsed from JSON).
-    engine / market_data / backtester:
+    engine / market_data:
         The live singletons the tool operates on. All order placement is routed
         through ``engine.place_order`` — the shared risk-check path.
     portfolio_id:
@@ -353,24 +326,6 @@ async def dispatch(
                 stop_loss=_opt_float(args.get("stop_loss")),
             )
             return _dump(order)
-
-        # ---- Backtest ---------------------------------------------------- #
-        if name == "run_backtest":
-            req = BacktestRequest(
-                code=args.get("code"),
-                strategy_id=args.get("strategy_id"),
-                symbols=list(args.get("symbols", [])),
-                interval=args.get("interval", "1d"),
-                start=args.get("start"),
-                end=args.get("end"),
-                starting_balance=float(args.get("starting_balance", 100_000.0)),
-                leverage=float(args.get("leverage", 1.0)),
-                commission_bps=float(args.get("commission_bps", 0.0)),
-                slippage_bps=float(args.get("slippage_bps", 0.0)),
-                params=args.get("params") or {},
-            )
-            result = await backtester.run(req)
-            return _dump(result)
 
         return {"error": f"unknown tool: {name}"}
 

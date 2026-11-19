@@ -1,6 +1,6 @@
 """MarketDataService — the single market-data surface for the whole platform.
 
-Everything that needs prices (engine, API, MCP, strategy runtime, backtest)
+Everything that needs prices (engine, API, MCP, strategy runtime)
 talks to a :class:`MarketDataService` obtained from :func:`get_market_data`.
 The service:
 

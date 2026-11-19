@@ -2,7 +2,7 @@
 
 `create_app()` builds the ASGI app: it wires a lifespan that initializes the
 database and constructs the shared singletons (market data, engine, strategy
-manager, backtester, AI manager), configures CORS from settings, mounts every
+manager, AI manager), configures CORS from settings, mounts every
 REST router under `/api`, registers the two WebSocket endpoints, and exposes a
 health probe.
 
@@ -27,7 +27,6 @@ from ..db.database import init_db
 from . import deps
 from .deps import setup_singletons, teardown_singletons
 from .routes_ai import router as ai_router
-from .routes_backtest import router as backtest_router
 from .routes_market import router as market_router
 from .routes_order import router as order_router
 from .routes_portfolio import router as portfolio_router
@@ -92,7 +91,6 @@ def create_app() -> FastAPI:
     app.include_router(portfolio_router, prefix="/api", tags=["portfolio"])
     app.include_router(order_router, prefix="/api", tags=["order"])
     app.include_router(strategy_router, prefix="/api", tags=["strategy"])
-    app.include_router(backtest_router, prefix="/api", tags=["backtest"])
     app.include_router(ai_router, prefix="/api", tags=["ai"])
 
     # WebSockets: /ws/market and /ws/events.

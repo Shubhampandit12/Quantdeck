@@ -102,4 +102,3 @@ class AISessionStatus(str, Enum):
 
 class RunMode(str, Enum):
     LIVE_PAPER = "live_paper"
-    BACKTEST = "backtest"

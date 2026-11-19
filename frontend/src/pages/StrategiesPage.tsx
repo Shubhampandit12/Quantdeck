@@ -37,9 +37,6 @@ export default function StrategiesPage() {
           <NavLink to="/strategies" className="qd-nav-link">
             Strategies
           </NavLink>
-          <NavLink to="/backtest" className="qd-nav-link">
-            Backtest
-          </NavLink>
         </div>
         <div className="qd-nav-right">
           {/* Portfolio switcher: pick which paper portfolio strategies run on. */}
@@ -65,7 +62,7 @@ export default function StrategiesPage() {
         <div>
           <h1 className="strat-page-title">Strategy Manager</h1>
           <p className="strat-page-sub muted">
-            Author code once, then backtest and run it live on paper money.
+            Author code once, then run it live on paper money.
             {active ? (
               <>
                 {" "}
@@ -76,9 +73,6 @@ export default function StrategiesPage() {
             )}
           </p>
         </div>
-        <Link to="/backtest" className="btn btn-primary strat-page-bt">
-          Open Backtester →
-        </Link>
       </header>
 
       {/* Manager body */}

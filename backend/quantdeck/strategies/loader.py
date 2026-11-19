@@ -17,10 +17,9 @@ IMPORTANT security note on where this runs. Static AST scanning is *necessary
 but not sufficient* — a determined attacker can still defeat a pure in-process
 allowlist. Therefore **live strategies run inside a subprocess sandbox**
 (see :mod:`quantdeck.strategies.sandbox`) which additionally applies OS-level
-resource limits and process isolation. The in-process ``load_strategy`` path
-here (also used by the backtester) is a documented, weaker tradeoff: it relies
-on scanning + restricted builtins only, and is intended for code the operator
-is willing to run in-process (backtests) rather than for hostile input.
+resource limits and process isolation. Inside that child, ``load_strategy``
+here does the scanning + restricted-builtins step; on its own (in-process) it
+would be a weaker tradeoff and is not intended for hostile input.
 """
 from __future__ import annotations
 
@@ -306,8 +305,8 @@ def load_strategy(source: str, params: Optional[dict] = None) -> Strategy:
     except Exception as exc:  # noqa: BLE001
         raise StrategyError(f"Failed to instantiate strategy: {exc}") from exc
 
-    # Attach params for ctx.param() to read; keep them on the instance so both
-    # live and backtest contexts can look them up uniformly.
+    # Attach params for ctx.param() to read; keep them on the instance so the
+    # strategy context can look them up.
     instance.params = dict(params or {})  # type: ignore[attr-defined]
     return instance
 

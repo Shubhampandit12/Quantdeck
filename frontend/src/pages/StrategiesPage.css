@@ -78,10 +78,6 @@
 .strat-page-sub strong {
   color: var(--text-0);
 }
-.strat-page-bt {
-  flex: 0 0 auto;
-  white-space: nowrap;
-}
 
 /* ---- Body ---- */
 .strat-page-body {

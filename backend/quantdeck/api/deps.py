@@ -1,9 +1,9 @@
 """Shared dependency accessors: process-wide singletons for the API layer.
 
 This module is the wiring hub. It constructs one of each collaborator —
-market-data service, trading engine, strategy manager, backtester, AI session
-manager — and hands them out through simple getter functions that the route
-modules and WebSocket layer call. `setup_singletons()` is invoked once from the
+market-data service, trading engine, strategy manager, AI session manager —
+and hands them out through simple getter functions that the route modules and
+WebSocket layer call. `setup_singletons()` is invoked once from the
 FastAPI lifespan (see `app.py`) after the database has been initialized.
 
 Everything downstream (routes, ws, MCP-in-process) talks to these getters so
@@ -22,7 +22,6 @@ from ..marketdata.service import MarketDataService, get_market_data as _get_md
 from ..marketdata.sp500 import DEMO_SYMBOLS
 from ..engine.engine import TradingEngine
 from ..strategies.runner import StrategyManager
-from ..backtest.engine import Backtester
 from ..ai.session import AISessionManager
 
 log = logging.getLogger("quantdeck.api.deps")
@@ -34,7 +33,6 @@ log = logging.getLogger("quantdeck.api.deps")
 _market_data: Optional[MarketDataService] = None
 _engine: Optional[TradingEngine] = None
 _strategy_manager: Optional[StrategyManager] = None
-_backtester: Optional[Backtester] = None
 _ai_manager: Optional[AISessionManager] = None
 
 # Convenience: the id of a "default" portfolio so a fresh install is usable
@@ -77,9 +75,9 @@ async def setup_singletons() -> None:
 
     Order matters: market data must be started before the engine loads (so the
     engine can mark restored positions), and the engine must exist before the
-    strategy manager / backtester / AI manager, which all drive it.
+    strategy manager / AI manager, which all drive it.
     """
-    global _market_data, _engine, _strategy_manager, _backtester, _ai_manager
+    global _market_data, _engine, _strategy_manager, _ai_manager
     global _default_portfolio_id, _market_feed_task
 
     if _engine is not None:  # already wired — do not rebuild collaborators
@@ -95,8 +93,7 @@ async def setup_singletons() -> None:
 
     # Higher-level services that all route through the single engine instance.
     _strategy_manager = StrategyManager(_engine, _market_data)
-    _backtester = Backtester(_market_data)
-    _ai_manager = AISessionManager(_engine, _market_data, _backtester)
+    _ai_manager = AISessionManager(_engine, _market_data)
 
     # Ensure at least one portfolio exists so the platform is usable on a fresh
     # database. Reuse an existing one if present.
@@ -125,7 +122,7 @@ async def _ensure_default_portfolio() -> None:
 
     # The demo's one portfolio is scoped to the fixed 15-symbol universe —
     # this is a per-portfolio RiskLimits, not the shared model default, so it
-    # doesn't affect tests, the backtester, or AI-session guardrails, which
+    # doesn't affect tests or AI-session guardrails, which
     # all construct their own RiskLimits independently.
     portfolio = await _engine.create_portfolio(
         name="Default",
@@ -139,7 +136,7 @@ async def _ensure_default_portfolio() -> None:
 
 async def teardown_singletons() -> None:
     """Release resources (market-data sockets/clients) on shutdown."""
-    global _market_data, _engine, _strategy_manager, _backtester, _ai_manager
+    global _market_data, _engine, _strategy_manager, _ai_manager
     global _market_feed_task
     if _market_feed_task is not None:
         _market_feed_task.cancel()
@@ -156,7 +153,6 @@ async def teardown_singletons() -> None:
     _market_data = None
     _engine = None
     _strategy_manager = None
-    _backtester = None
     _ai_manager = None
 
 
@@ -182,10 +178,6 @@ def get_engine() -> TradingEngine:
 
 def get_strategy_manager() -> StrategyManager:
     return _require(_strategy_manager, "strategy_manager")  # type: ignore[return-value]
-
-
-def get_backtester() -> Backtester:
-    return _require(_backtester, "backtester")  # type: ignore[return-value]
 
 
 def get_ai_manager() -> AISessionManager:

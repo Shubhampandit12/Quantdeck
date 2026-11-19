@@ -5,10 +5,9 @@ average of the close price. When the fast average rises above the slow average
 we treat it as a bullish signal and go long; when the fast average falls back
 below the slow average we flatten the position.
 
-The strategy touches nothing but the ``ctx`` (StrategyContext) surface, so the
-identical file runs unchanged in live-paper mode (via ``strategies.runner``) and
-in backtests (via ``backtest.engine``). It is also sandbox-safe: no imports, no
-filesystem or network access, no dunder tricks.
+The strategy touches nothing but the ``ctx`` (StrategyContext) surface and runs
+in live-paper mode (via ``strategies.runner``). It is also sandbox-safe: no
+imports, no filesystem or network access, no dunder tricks.
 
 Parameters (read via ``ctx.param``):
   * ``fast``    fast SMA window (default 10)
@@ -30,7 +29,7 @@ class SmaCrossover(Strategy):
     name = "SMA Crossover"
 
     def on_start(self, ctx) -> None:
-        # Read tunables from the strategy params (UI / backtest request).
+        # Read tunables from the strategy params (set from the UI).
         self.fast = int(ctx.param("fast", 10))
         self.slow = int(ctx.param("slow", 30))
         self.symbol = str(ctx.param("symbol", "AAPL"))

@@ -130,15 +130,12 @@ export default function HomePage() {
           </h1>
           <p className="hero-sub">
             A full TradingView-style terminal for US stocks. Chart, place
-            paper orders, run code backtests, and let an AI agent trade a
+            paper orders, run code strategies, and let an AI agent trade a
             demo portfolio for you.
           </p>
           <div className="hero-cta">
             <Link className="btn btn-primary btn-lg" to={terminalPath("AAPL")}>
               Open the trading terminal →
-            </Link>
-            <Link className="btn btn-lg" to="/backtest">
-              Try a backtest
             </Link>
           </div>
           <div className="hero-note">
@@ -176,7 +173,6 @@ export default function HomePage() {
         <div className="foot-links">
           <Link to="/terminal">Terminal</Link>
           <Link to="/strategies">Strategies</Link>
-          <Link to="/backtest">Backtest</Link>
         </div>
       </footer>
     </div>
@@ -197,7 +193,6 @@ function HomeNav() {
         <Link to="/terminal">Markets</Link>
         <Link to={terminalPath("AAPL")}>Charts</Link>
         <Link to="/strategies">Strategies</Link>
-        <Link to="/backtest">Backtest</Link>
       </div>
       <div className="home-nav-spacer" />
       <SymbolSearch />

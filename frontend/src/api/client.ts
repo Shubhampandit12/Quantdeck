@@ -2,8 +2,6 @@
 // docs/API_CONTRACT.md. All calls go through `req()` which handles JSON + errors.
 import type {
   AITraceStep,
-  BacktestRequest,
-  BacktestResult,
   Fill,
   OHLCVResponse,
   Order,
@@ -126,10 +124,6 @@ export const api = {
   stopStrategy: (id: string) => req<StrategySummary>(`/strategies/${id}/stop`, { method: "POST" }),
   strategyLogs: (id: string, limit = 200) =>
     req<{ logs: string[] }>(`/strategies/${id}/logs?limit=${limit}`),
-
-  // Backtest
-  backtest: (body: BacktestRequest) =>
-    req<BacktestResult>("/backtest", { method: "POST", body: JSON.stringify(body) }),
 
   // AI
   aiStatus: () => req<{ enabled: boolean; model: string }>("/ai/status"),

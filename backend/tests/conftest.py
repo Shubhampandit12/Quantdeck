@@ -11,7 +11,7 @@ Design goals:
 
 Fixtures are written against the export-contract names so they exercise the same
 concrete modules the rest of the platform imports (``TradingEngine``,
-``MarketDataService``, ``Backtester``, ...). It is fine for a fixture to import a
+``MarketDataService``, ...). It is fine for a fixture to import a
 module built by another agent — those imports resolve at integration time.
 """
 from __future__ import annotations
@@ -189,8 +189,8 @@ class FakeMarketData:
             closes = closes[-limit:]
 
         # An empty series means "no data for this symbol": return zero bars
-        # honestly instead of raising, so backtests over a data-less symbol get
-        # an empty OHLCVResponse (never fabricated candles, never a raw crash).
+        # honestly instead of raising, so callers asking for a data-less symbol
+        # get an empty OHLCVResponse (never fabricated candles, never a raw crash).
         bars: list[Bar] = []
         if not closes:
             return OHLCVResponse(

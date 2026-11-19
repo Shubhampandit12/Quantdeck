@@ -57,7 +57,6 @@ class Settings(BaseSettings):
     # --- Strategy sandbox ---
     strategy_timeout_seconds: float = 30.0     # per-callback wall clock
     strategy_memory_mb: int = 512
-    backtest_max_bars: int = 200_000
 
     # --- Defaults ---
     default_starting_balance: float = 100_000.0

@@ -1,7 +1,7 @@
 // StrategyManager — author, save, run, and monitor trading strategies.
 // Left rail lists strategies; center is a monospace code editor with a
 // line-number gutter; right controls start/stop against a portfolio and
-// stream logs. The SAME code that backtests also runs live (reproducibility).
+// stream logs.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../api/client";
 import { openEventSocket } from "../api/ws";
@@ -9,8 +9,8 @@ import type { MarketEvent, StrategySummary } from "../api/types";
 import "./StrategyManager.css";
 
 // Helpful starter shown when authoring a brand-new strategy. The runtime calls
-// `on_bar(ctx, bar)` for each bar; the same entrypoint is used by the backtester.
-const EXAMPLE_CODE = `# SMA crossover — the SAME code backtests and runs live.
+// `on_bar(ctx, bar)` for each bar.
+const EXAMPLE_CODE = `# SMA crossover.
 # ctx exposes: ctx.price(symbol), ctx.position(symbol), ctx.buy(symbol, qty),
 # ctx.sell(symbol, qty), ctx.log(msg), ctx.sma(symbol, period).
 # Fast SMA crossing above slow SMA => go long; crossing below => flatten.
@@ -359,12 +359,6 @@ export default function StrategyManager({ portfolioId }: { portfolioId: string }
             onScroll={onEditorScroll}
             wrap="off"
           />
-        </div>
-
-        {/* Reproducibility note */}
-        <div className="strat-note muted">
-          Reproducibility: this exact code runs in both the backtester and the live paper engine —
-          no divergent code paths. Backtest it, then start it live with confidence.
         </div>
 
         {/* Logs pane */}

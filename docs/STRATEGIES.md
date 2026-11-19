@@ -1,8 +1,8 @@
 # Writing Strategies
 
 A strategy is a Python class that subclasses `quantdeck.strategies.Strategy` and
-overrides lifecycle hooks. The **same file** runs in a backtest and live (paper)
-— because both drive it through the identical `StrategyContext` surface.
+overrides lifecycle hooks. It runs live on paper money, driven through the
+`StrategyContext` surface.
 
 ## Minimal example
 
@@ -68,7 +68,7 @@ class MyStrategy(Strategy):
 
 **Misc**
 - `ctx.log(*args)` — appears in the strategy log panel
-- `ctx.param(key, default)` — read a param passed from the UI / backtest request
+- `ctx.param(key, default)` — read a param passed from the UI
 
 ## Sandbox rules (important)
 
@@ -91,16 +91,10 @@ rejected before your code runs.
 > sandbox cannot constrain. They are therefore **not** on the import allowlist.
 > This is a deliberate security decision for running untrusted code.
 
-## Backtest vs live
+## Running a strategy
 
-- **Backtest:** `POST /api/backtest` with `{ code, symbols, interval, start, end,
-  starting_balance, leverage, commission_bps, slippage_bps, params }`. The result
-  leads with `total_pnl` and `total_return_pct`.
-- **Live paper:** save the strategy (`POST /api/strategies`), then
-  `POST /api/strategies/{id}/start` with a portfolio id. Watch logs + P&L in the
-  terminal's Strategy Logs tab.
-
-Given the same historical data, a strategy produces the same result in both
-modes — the engine's accounting/matching math is shared.
+Save the strategy (`POST /api/strategies`), then
+`POST /api/strategies/{id}/start` with a portfolio id. Watch logs + P&L in the
+terminal's Strategy Logs tab.
 
 See runnable examples in `backend/strategies_examples/`.

@@ -21,9 +21,9 @@ FROZEN CONTRACT. A user strategy looks like:
             elif fast < slow and pos is not None and pos.side.value == "long":
                 ctx.close(bar.symbol)
 
-The `ctx` object is provided by the runtime (live) or the backtester. Both
-implement `StrategyContext`, so identical code runs in both. Hooks are plain
-(sync) methods — the runtime bridges to the async engine.
+The `ctx` object is provided by the live runtime and implements
+`StrategyContext`. Hooks are plain (sync) methods — the runtime bridges to the
+async engine.
 """
 from __future__ import annotations
 
@@ -109,7 +109,7 @@ class StrategyContext(Protocol):
     def log(self, *args: Any) -> None: ...
 
     def param(self, key: str, default: Any = None) -> Any:
-        """Read a strategy parameter passed in from the UI/backtest request."""
+        """Read a strategy parameter passed in from the UI."""
         ...
 
 

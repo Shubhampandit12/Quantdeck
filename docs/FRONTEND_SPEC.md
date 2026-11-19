@@ -22,12 +22,12 @@ Green for >=0, red for <0 using `.up`/`.down`.
 
 ### HomePage (`src/pages/HomePage.tsx` + `HomePage.css`)
 Resembles TradingView home:
-- Top nav bar: logo "QuantDeck", nav links (Markets / Charts / Strategies / Backtest), a symbol search box (calls api.search, navigates to /terminal/:symbol), and a permanent `PAPER / DEMO MONEY` badge (.badge-demo).
+- Top nav bar: logo "QuantDeck", nav links (Markets / Charts / Strategies), a symbol search box (calls api.search, navigates to /terminal/:symbol), and a permanent `PAPER / DEMO MONEY` badge (.badge-demo).
 - Hero: bold headline (e.g. "Trade the markets with AI — with zero real-money risk"), subtext, big CTA button "Open the trading terminal" → /terminal/AAPL.
 - Market overview: a scrolling ticker tape of major symbols (AAPL, MSFT, NVDA, TSLA, AMZN, GOOGL, META, SPY...) with live price + change% (subscribe via openMarketSocket; seed with api.quotes). Mini sparkline optional (can fetch small ohlcv).
 - Movers: "Top Gainers / Top Losers" cards from api.marketSummary().
 - Clicking any symbol anywhere → navigate to /terminal/:symbol.
-- No watchlist preview and no features grid on this page — the terminal (`/terminal`) and backtest (`/backtest`) CTAs above are the only other entry points.
+- No watchlist preview and no features grid on this page — the terminal (`/terminal`) CTA above is the only other entry point.
 
 ### TerminalPage (`src/pages/TerminalPage.tsx` + css) — the full terminal
 
@@ -48,9 +48,8 @@ Grid layout (TradingView-like):
 - Command bar (bottom): a single input that does natural-language order entry / AI chat → api.aiChat; render the reply + trace.
 - Live updates: subscribe openEventSocket(activePortfolioId) → on order/position/portfolio events call store.refreshSnapshot() (debounced).
 
-### StrategyManager (`src/components/StrategyManager.tsx`) + BacktestPanel
+### StrategyManager (`src/components/StrategyManager.tsx`)
 - StrategyManager: list strategies (api.strategies), a Monaco-free code editor (a styled <textarea> with monospace + line highlighting is fine), create/edit/save/delete, start/stop against the active portfolio, live status + logs (via strategyLogs poll or events).
-- BacktestPanel: form (symbols, interval, date range, starting_balance, leverage, commission_bps, slippage_bps, code or strategy select) → api.backtest. Render result LEADING with big total P&L ($ and %) and ending balance, then an equity-curve chart (lightweight-charts line series), key metrics grid (return, max DD, Sharpe, win rate, #trades, profit factor), and a trades table. Show data_warnings prominently. These can live on the terminal (a tab/modal) or dedicated routes /strategies and /backtest — your choice, but reachable from the top nav.
 
 ### AISessionPanel (`src/components/AISessionPanel.tsx`)
 Textarea for the natural-language strategy prompt + guardrails (allowed symbols, max order notional, max orders/min, max daily loss), Start/Pause/Resume/Stop buttons, and a live scrolling trace of the AI's thoughts / tool calls / results (from openEventSocket ai_trace events or polling api.aiSession). Always-visible "Flatten all / kill switch" button → api.flatten.

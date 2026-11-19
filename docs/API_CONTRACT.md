@@ -64,12 +64,6 @@ string values are exactly as in `core/enums.py`.
 - `POST /api/strategies/{id}/stop` → `StrategySummary`
 - `GET /api/strategies/{id}/logs?limit=200` → `{ logs: string[] }`
 
-## Backtesting
-
-- `POST /api/backtest` body `BacktestRequest` → `BacktestResult`
-  - `BacktestRequest` = `{ code?, strategy_id?, symbols[], interval, start?, end?, starting_balance, leverage, fill_mode, commission_bps, slippage_bps, params? }`
-  - `BacktestResult` leads with `total_pnl`, `total_return_pct`, `ending_balance`, then `equity_curve[]`, `trades[]`, metrics, `logs[]`, `data_warnings[]`.
-
 ## AI trading
 
 - `GET /api/ai/status` → `{ enabled: boolean, model: string }`

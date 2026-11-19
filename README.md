@@ -17,8 +17,8 @@ You can watch the full S&P 500 on a candlestick chart with a real
 drawing-tool set (trend lines, Fibonacci, channels, long/short markers), then
 act on what you see three ways: place an order by hand,
 type a plain-English instruction ("buy 10 AAPL") for an AI to translate into
-an order, or write a Python strategy that trades on its own — live or
-backtested against history. Positions carry leverage, margin, and liquidation
+an order, or write a Python strategy that trades on its own on live paper
+money. Positions carry leverage, margin, and liquidation
 math, not just a flat cash balance.
 
 ## 2. One engine, one risk path
@@ -34,7 +34,7 @@ private, less-checked path to the order book.
 ```
 market data ──► TradingEngine ──┬─► REST + WebSocket API ──► React terminal
 (Yahoo/Finnhub/     (orders,     ├─► MCP server ──► Claude Desktop / Code
-    Alpaca)         fills,       └─► strategy sandbox ──► backtester
+    Alpaca)         fills,       └─► strategy sandbox
                     positions,
                     margin)
 ```
@@ -91,8 +91,8 @@ dispatch layer *before* an order is even built, on top of the engine's own
 checks — belt and suspenders rather than trusting one gate. `stop()` is
 always a kill switch: it halts the session and flattens every open position.
 
-The same 12-tool schema (quotes, OHLCV, portfolio/orders/history,
-place/cancel/modify order, backtest, market summary) backs both that in-app
+The same 11-tool schema (quotes, OHLCV, portfolio/orders/history,
+place/cancel/modify order, market summary) backs both that in-app
 AI and a standalone MCP server, so Claude Desktop or Claude Code can trade a
 paper account too — over HTTP calls to the same running API, which means an
 external MCP client is just as bound by the shared risk path as everything
@@ -108,15 +108,14 @@ if you add auth.
 
 ```
 $ cd backend && pytest -q
-37 passed in 15.24s
+32 passed in 6.66s
 ```
 
 The suite runs against a deterministic fake market-data provider, so there's
 no network I/O and no flakiness. Coverage: position/P&L/margin/liquidation
 math in isolation (`test_accounting.py`), order flow through the engine —
 limits, shorts, leverage, rejections, bracket TP/SL, flatten-all
-(`test_engine.py`), the three example strategies replayed end-to-end through
-the backtester (`test_backtest.py`), and symbol classification / S&P 500
+(`test_engine.py`), and symbol classification / S&P 500
 loading (`test_marketdata_offline.py`). There's no frontend test suite yet —
 UI correctness right now rests on manual testing in a real browser, not
 automation.
@@ -164,7 +163,6 @@ backend/
     marketdata/   provider adapters + MarketDataService (+ S&P 500 loader)
     engine/       TradingEngine, accounting, matching, persistence
     strategies/   Strategy SDK, loader, subprocess sandbox, live runner
-    backtest/     Backtester (same SDK, historical replay)
     ai/           MCP tool schema + dispatch, AI session manager
     api/          FastAPI app, routers, WebSockets
     mcp_server/   standalone MCP stdio server
@@ -173,8 +171,8 @@ backend/
 frontend/
   src/
     api/          typed REST client + WS helpers + shared types
-    pages/        HomePage, TerminalPage, StrategiesPage, BacktestPage
-    components/   terminal/*, drawing/*, StrategyManager, BacktestPanel, AISessionPanel
+    pages/        HomePage, TerminalPage, StrategiesPage
+    components/   terminal/*, drawing/*, StrategyManager, AISessionPanel
     state/        zustand store
 docs/             SPINE, API_CONTRACT, FRONTEND_SPEC, STRATEGIES, MCP, DEPLOY
 ```

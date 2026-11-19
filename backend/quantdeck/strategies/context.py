@@ -15,8 +15,8 @@ parent then executes it against the real async engine). Market data —
 buffers that the runtime fills from streamed bars/quotes, so read paths never
 block.
 
-The same surface (:class:`~quantdeck.strategies.sdk.StrategyContext`) is used
-by the backtester, keeping user code identical across live and backtest.
+It implements the :class:`~quantdeck.strategies.sdk.StrategyContext` surface
+that user strategies are written against.
 """
 from __future__ import annotations
 
