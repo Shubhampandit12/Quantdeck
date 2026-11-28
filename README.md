@@ -3,8 +3,8 @@
 A paper-trading terminal for testing trading ideas — by hand, by AI, or by
 code — against live US-equity markets, with none of it touching real money.
 
-![Home page](docs/screenshots/home.png)
-![Trading terminal](docs/screenshots/terminal-with-position.png)
+![Trading terminal with an open AAPL position](docs/screenshots/terminal.png)
+![Strategy manager with the default Strategy A](docs/screenshots/strategies.png)
 
 There is no brokerage or exchange integration anywhere in the codebase, and
 no config flag that adds one. The only external credentials it ever uses are
@@ -13,13 +13,16 @@ Every balance, fill, and P&L number is simulated.
 
 ## 1. What it does
 
-You can watch the full S&P 500 on a candlestick chart with a real
-drawing-tool set (trend lines, Fibonacci, channels, long/short markers), then
-act on what you see three ways: place an order by hand,
-type a plain-English instruction ("buy 10 AAPL") for an AI to translate into
-an order, or write a Python strategy that trades on its own on live paper
-money. Positions carry leverage, margin, and liquidation
-math, not just a flat cash balance.
+You can watch 15 large US stocks (AAPL, MSFT, NVDA, AMZN, GOOGL, META, TSLA,
+BRK.B, LLY, AVGO, JPM, UNH, V, JNJ, XOM) on a candlestick chart with
+1m to 1w timeframes, then act on what you see three ways: place a market
+order by hand from the terminal, give an AI agent a strategy brief and let it
+trade on its own, or write a Python strategy that trades live on paper money.
+The terminal keeps manual trading deliberately simple; the engine itself also
+supports limit, stop and stop-limit orders with take-profit / stop-loss legs,
+which the AI agent, MCP clients and strategies can use. Positions carry leverage,
+margin, and liquidation math, not just a flat cash balance. Prices and
+portfolio changes stream to the browser over WebSockets.
 
 ## 2. One engine, one risk path
 
@@ -64,11 +67,18 @@ A user strategy is untrusted code by default, so it's checked twice before it
 can trade. First, a static AST pass rejects dangerous imports (`os`,
 `subprocess`, `socket`, `pickle`, ...) and any attempt to reach for dunder
 attributes like `__globals__` or `__subclasses__` — the standard levers for
-escaping a Python sandbox. Second, live strategies additionally run in a
+escaping a Python sandbox. Second, live strategies run in a
 separate subprocess with OS-level CPU and memory limits, talking to the
 parent process only through a JSON line protocol; the child never has a
 handle to the real engine, only "I want to buy" style intents that the
 parent validates and executes.
+
+Strategies run on candles built live from the streamed prices, at the
+interval you pick (1m by default), until you press Stop. The editor opens
+with a commented example, **Strategy A**: buy after three green candles, go
+short after three red ones, and exit on the first candle in the other
+direction. Outside US market hours prices don't move, so every candle is flat
+and the strategy correctly stays out of the market.
 
 NumPy and pandas are both backend dependencies (`yfinance` uses them) but
 they are deliberately kept off the strategy import allowlist, even though
@@ -108,15 +118,15 @@ if you add auth.
 
 ```
 $ cd backend && pytest -q
-32 passed in 6.66s
+32 passed in 0.64s
 ```
 
 The suite runs against a deterministic fake market-data provider, so there's
 no network I/O and no flakiness. Coverage: position/P&L/margin/liquidation
 math in isolation (`test_accounting.py`), order flow through the engine —
 limits, shorts, leverage, rejections, bracket TP/SL, flatten-all
-(`test_engine.py`), and symbol classification / S&P 500
-loading (`test_marketdata_offline.py`). There's no frontend test suite yet —
+(`test_engine.py`), and symbol handling and the fixed stock list
+(`test_marketdata_offline.py`). There's no frontend test suite yet —
 UI correctness right now rests on manual testing in a real browser, not
 automation.
 
@@ -131,9 +141,10 @@ then starts the API on `:8000` and the frontend on `:5173` together, waiting
 for the backend health check before opening the UI. Ctrl+C stops both. Ports
 are configurable (`QUANTDECK_PORT=9000 FRONTEND_PORT=5000 ./start.sh`).
 
-For real-time US-equity data, add a free Finnhub or Alpaca key to
-`backend/.env`; otherwise it falls back to delayed Yahoo data automatically.
-Add `ANTHROPIC_API_KEY` to enable the AI features.
+For real-time US-equity data, add a free Finnhub key
+(`QUANTDECK_FINNHUB_API_KEY`) or Alpaca keys to `backend/.env` (see
+`backend/.env.example`); otherwise it falls back to delayed Yahoo data
+automatically. Add `ANTHROPIC_API_KEY` to enable the AI features.
 
 <details>
 <summary>Run the two services separately</summary>
@@ -150,7 +161,7 @@ Ships as a single Docker image — the backend serves the built frontend from
 one origin, so there's no CORS to configure. Easiest path is Render (push to
 GitHub, then Blueprint → this repo, it reads `render.yaml`); the image also
 runs anywhere that takes a `$PORT`-bound container (Fly.io, Railway, a VPS).
-Full instructions, plan tradeoffs, and the region/AI-key caveats above are in
+Full instructions, plan tradeoffs, and the AI-key caveat above are in
 `docs/DEPLOY.md`.
 
 ## 8. Project layout
@@ -160,7 +171,7 @@ backend/
   quantdeck/
     core/         canonical models, config, event bus, errors, symbols
     db/           async SQLAlchemy models + session
-    marketdata/   provider adapters + MarketDataService (+ S&P 500 loader)
+    marketdata/   provider adapters + MarketDataService (+ fixed stock list)
     engine/       TradingEngine, accounting, matching, persistence
     strategies/   Strategy SDK, loader, subprocess sandbox, live runner
     ai/           MCP tool schema + dispatch, AI session manager
@@ -172,7 +183,7 @@ frontend/
   src/
     api/          typed REST client + WS helpers + shared types
     pages/        HomePage, TerminalPage, StrategiesPage
-    components/   terminal/*, drawing/*, StrategyManager, AISessionPanel
+    components/   terminal/*, StrategyManager, AISessionPanel
     state/        zustand store
 docs/             SPINE, API_CONTRACT, FRONTEND_SPEC, STRATEGIES, MCP, DEPLOY
 ```
