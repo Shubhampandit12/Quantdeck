@@ -72,12 +72,8 @@ from quantdeck.core import symbols as _symbols  # noqa: E402
 _INTERVAL_MINUTES = {
     "1m": 1,
     "5m": 5,
-    "15m": 15,
-    "30m": 30,
     "1h": 60,
     "4h": 240,
-    "1d": 60 * 24,
-    "1w": 60 * 24 * 7,
 }
 
 

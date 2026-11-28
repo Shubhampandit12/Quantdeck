@@ -93,7 +93,7 @@ async def get_quotes(
 @router.get("/ohlcv/{symbol:path}", response_model=OHLCVResponse)
 async def get_ohlcv(
     symbol: str,
-    interval: str = Query(default="1d"),
+    interval: str = Query(default="1h"),
     limit: int = Query(default=500, ge=1, le=5000),
     start: Optional[str] = Query(default=None),
     end: Optional[str] = Query(default=None),

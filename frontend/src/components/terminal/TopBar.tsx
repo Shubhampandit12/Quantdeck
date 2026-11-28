@@ -12,7 +12,7 @@ import { useStore } from "../../state/store";
 import { fmtUsd, signClass, fmtSigned } from "../../lib/format";
 import type { Timeframe } from "../../pages/TerminalPage";
 
-const TIMEFRAMES: Timeframe[] = ["1m", "5m", "15m", "1h", "4h", "1d", "1w"];
+const TIMEFRAMES: Timeframe[] = ["1m", "5m", "1h", "4h"];
 
 interface Props {
   timeframe: Timeframe;

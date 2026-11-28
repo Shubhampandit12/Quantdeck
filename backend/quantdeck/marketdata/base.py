@@ -15,7 +15,7 @@ from ..core.enums import AssetClass
 from ..core.models import OHLCVResponse, Quote, SymbolInfo
 
 # Canonical intervals the platform understands. Providers map these to their own.
-VALID_INTERVALS = ("1m", "5m", "15m", "30m", "1h", "4h", "1d", "1w")
+VALID_INTERVALS = ("1m", "5m", "1h", "4h")
 
 
 class MarketDataProvider(abc.ABC):

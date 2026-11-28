@@ -388,7 +388,7 @@ export default function StrategyManager({ portfolioId }: { portfolioId: string }
               onChange={(e) => setIntervalStr(e.target.value)}
               disabled={running}
             >
-              {["1m", "5m", "15m", "1h", "4h", "1d", "1w"].map((iv) => (
+              {["1m", "5m", "1h", "4h"].map((iv) => (
                 <option key={iv} value={iv}>
                   {iv}
                 </option>

@@ -61,7 +61,7 @@ export const api = {
   quote: (symbol: string) => req<Quote>(`/quote/${enc(symbol)}`),
   quotes: (symbols: string[]) =>
     req<Quote[]>(`/quotes?symbols=${enc(symbols.join(","))}`),
-  ohlcv: (symbol: string, interval = "1d", limit = 500, start?: string, end?: string) => {
+  ohlcv: (symbol: string, interval = "1h", limit = 500, start?: string, end?: string) => {
     const p = new URLSearchParams({ interval, limit: String(limit) });
     if (start) p.set("start", start);
     if (end) p.set("end", end);

@@ -14,7 +14,7 @@ import OrderTicket from "../components/terminal/OrderTicket";
 import PortfolioSummary from "../components/terminal/PortfolioSummary";
 import BottomPanel from "../components/terminal/BottomPanel";
 
-export type Timeframe = "1m" | "5m" | "15m" | "1h" | "4h" | "1d" | "1w";
+export type Timeframe = "1m" | "5m" | "1h" | "4h";
 
 export default function TerminalPage() {
   const { symbol } = useParams();

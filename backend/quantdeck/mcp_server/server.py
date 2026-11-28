@@ -104,7 +104,7 @@ async def _dispatch_over_rest(
         return await _call_api(client, "GET", f"/api/quote/{sym}")
 
     if name == "get_ohlcv":
-        params = {"interval": args.get("interval", "1d"), "limit": args.get("limit", 100)}
+        params = {"interval": args.get("interval", "1h"), "limit": args.get("limit", 100)}
         if args.get("start"):
             params["start"] = args["start"]
         if args.get("end"):

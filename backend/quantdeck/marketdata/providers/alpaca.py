@@ -34,12 +34,8 @@ _DATA_BASE = "https://data.alpaca.markets"
 _TIMEFRAME_MAP = {
     "1m": "1Min",
     "5m": "5Min",
-    "15m": "15Min",
-    "30m": "30Min",
     "1h": "1Hour",
     "4h": "4Hour",
-    "1d": "1Day",
-    "1w": "1Week",
 }
 
 

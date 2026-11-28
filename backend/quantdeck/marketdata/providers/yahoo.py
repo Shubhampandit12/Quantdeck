@@ -28,14 +28,10 @@ log = logging.getLogger("quantdeck.marketdata.yahoo")
 _INTERVAL_MAP = {
     "1m": "1m",
     "5m": "5m",
-    "15m": "15m",
-    "30m": "30m",
     "1h": "60m",
-    # yfinance has no native 4h bar and we do not resample, so '4h' is refused
-    # (get_ohlcv raises DataUnavailableError) rather than returning 60m candles
-    # mislabelled as 4h — OHLCVResponse.interval must describe the true bars.
-    "1d": "1d",
-    "1w": "1wk",
+    # yfinance has no native 4h bar, so 4h fetches hourly bars and combines
+    # every four hours into one candle (see _fetch_ohlcv_blocking).
+    "4h": "60m",
 }
 
 # Reasonable lookback windows per interval when start/end aren't given.
@@ -43,12 +39,8 @@ _INTERVAL_MAP = {
 _DEFAULT_PERIOD = {
     "1m": "7d",
     "5m": "60d",
-    "15m": "60d",
-    "30m": "60d",
     "1h": "730d",
     "4h": "730d",
-    "1d": "5y",
-    "1w": "10y",
 }
 
 
@@ -213,6 +205,19 @@ class YahooProvider(MarketDataProvider):
             return []
         if hist is None or hist.empty:
             return []
+
+        if interval == "4h":
+            # Combine hourly bars into 4-hour candles. Buckets are counted from
+            # midnight UTC, the same way the live chart and the strategy runner
+            # group prices, so history and live candles line up.
+            if hist.index.tz is not None:
+                hist = hist.tz_convert("UTC")
+            hist = (
+                hist.resample("4h", origin="epoch")
+                .agg({"Open": "first", "High": "max", "Low": "min",
+                      "Close": "last", "Volume": "sum"})
+                .dropna(subset=["Open"])
+            )
 
         out: list[dict] = []
         for ts, row in hist.iterrows():

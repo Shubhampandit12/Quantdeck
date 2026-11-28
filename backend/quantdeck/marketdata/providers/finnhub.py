@@ -31,29 +31,20 @@ log = logging.getLogger("quantdeck.marketdata.finnhub")
 _REST_BASE = "https://finnhub.io/api/v1"
 _WS_BASE = "wss://ws.finnhub.io"
 
-# Canonical interval -> Finnhub resolution. Finnhub has no native 4h/1w-clean
-# mapping: we approximate 4h with 60 (hourly) and 1w with "W".
+# Canonical interval -> Finnhub resolution. Finnhub has no 4h resolution, so
+# 4h is left out: the service then falls through to Alpaca or Yahoo, which
+# return real 4-hour candles (rather than hourly candles labelled as 4h).
 _RESOLUTION_MAP = {
     "1m": "1",
     "5m": "5",
-    "15m": "15",
-    "30m": "30",
     "1h": "60",
-    "4h": "60",
-    "1d": "D",
-    "1w": "W",
 }
 
 # How far back (seconds) to request per interval when start/end are absent.
 _LOOKBACK_SECONDS = {
     "1m": 60 * 60 * 24 * 5,
     "5m": 60 * 60 * 24 * 20,
-    "15m": 60 * 60 * 24 * 40,
-    "30m": 60 * 60 * 24 * 60,
     "1h": 60 * 60 * 24 * 120,
-    "4h": 60 * 60 * 24 * 200,
-    "1d": 60 * 60 * 24 * 365 * 3,
-    "1w": 60 * 60 * 24 * 365 * 8,
 }
 
 

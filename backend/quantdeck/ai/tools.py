@@ -77,8 +77,8 @@ def tool_specs() -> list[dict]:
                     "symbol": {"type": "string"},
                     "interval": {
                         "type": "string",
-                        "description": "One of 1m,5m,15m,30m,1h,4h,1d,1w",
-                        "default": "1d",
+                        "description": "One of 1m, 5m, 1h, 4h",
+                        "default": "1h",
                     },
                     "limit": {
                         "type": "integer",
@@ -259,7 +259,7 @@ async def dispatch(
         if name == "get_ohlcv":
             resp = await market_data.get_ohlcv(
                 args["symbol"],
-                args.get("interval", "1d"),
+                args.get("interval", "1h"),
                 start=args.get("start"),
                 end=args.get("end"),
                 limit=int(args.get("limit", 100)),
