@@ -74,7 +74,7 @@
 .pill-group button.active {
   background: var(--accent);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(59, 123, 255, 0.32);
+  box-shadow: 0 2px 8px rgba(30, 77, 58, 0.20);
 }
 .pill-group button.active:hover {
   background: var(--accent-hover);
@@ -132,7 +132,7 @@
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(24, 32, 27, 0.35);
   backdrop-filter: blur(3px);
   display: flex;
   align-items: center;

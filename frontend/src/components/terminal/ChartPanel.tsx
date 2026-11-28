@@ -63,7 +63,7 @@ export default function ChartPanel({ symbol, interval }: Props) {
       autoSize: true,
       layout: {
         background: { color: "transparent" },
-        textColor: "#a3a6af",
+        textColor: "#525b55",
         // The chart draws on a canvas, which can't read CSS variables, so pass
         // the resolved UI font stack.
         fontFamily:
@@ -71,11 +71,11 @@ export default function ChartPanel({ symbol, interval }: Props) {
           "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       },
       grid: {
-        vertLines: { color: "#1c2230" },
-        horzLines: { color: "#1c2230" },
+        vertLines: { color: "#eef0e9" },
+        horzLines: { color: "#eef0e9" },
       },
-      rightPriceScale: { borderColor: "#2a2e39" },
-      timeScale: { borderColor: "#2a2e39", timeVisible: true, secondsVisible: false },
+      rightPriceScale: { borderColor: "#e3e6de" },
+      timeScale: { borderColor: "#e3e6de", timeVisible: true, secondsVisible: false },
       crosshair: { mode: CrosshairMode.Normal },
       // Explicitly enable all mouse-driven navigation so scroll-wheel zoom,
       // drag-to-pan, and pinch all work (defaults can be surprising).
@@ -93,12 +93,12 @@ export default function ChartPanel({ symbol, interval }: Props) {
       },
     });
     const s = c.addCandlestickSeries({
-      upColor: "#26a69a",
-      downColor: "#ef5350",
-      borderUpColor: "#26a69a",
-      borderDownColor: "#ef5350",
-      wickUpColor: "#26a69a",
-      wickDownColor: "#ef5350",
+      upColor: "#1e7a50",
+      downColor: "#c0533b",
+      borderUpColor: "#1e7a50",
+      borderDownColor: "#c0533b",
+      wickUpColor: "#1e7a50",
+      wickDownColor: "#c0533b",
     });
     chartRef.current = c;
     seriesRef.current = s;

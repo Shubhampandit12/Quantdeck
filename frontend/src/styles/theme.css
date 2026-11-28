@@ -1,31 +1,31 @@
-/* QuantDeck dark theme — TradingView-inspired palette + design tokens.
+/* QuantDeck "Forest" theme — off-white surfaces, deep green accent.
    Every component uses these CSS variables so the look stays consistent. */
 
 :root {
-  /* Palette — deep, slightly blue-tinted neutrals for a premium dark feel.
-     A touch more contrast between layers than before so panels read as
-     distinct surfaces without hard lines. */
-  --bg-0: #0a0b0f;      /* app background (near-black, subtle blue) */
-  --bg-1: #10131a;      /* panels */
-  --bg-2: #171b25;      /* raised surfaces / cards */
-  --bg-3: #1f2430;      /* hover / inputs */
-  --bg-4: #272d3b;      /* active / pressed */
-  --border: #1e222c;    /* hairline — deliberately soft, low-contrast */
-  --border-strong: #2b3140;
+  color-scheme: light;
 
-  --text-0: #eef1f6;    /* primary text — brighter for crispness */
-  --text-1: #9aa3b2;    /* secondary */
-  --text-2: #5f6875;    /* muted */
+  /* Palette — warm off-white neutrals with a green bias. */
+  --bg-0: #f8f8f4;      /* app background (off-white) */
+  --bg-1: #ffffff;      /* panels */
+  --bg-2: #f1f3ec;      /* raised surfaces / cards */
+  --bg-3: #e9ece3;      /* hover / inputs */
+  --bg-4: #dfe4d8;      /* active / pressed */
+  --border: #e3e6de;    /* hairline */
+  --border-strong: #cfd5c9;
 
-  --accent: #3b7bff;    /* refined blue */
-  --accent-hover: #5a90ff;
-  --accent-soft: rgba(59, 123, 255, 0.14);
-  --accent-grad: linear-gradient(135deg, #4f86ff 0%, #7a5cff 100%);
-  --up: #2bb8a3;        /* teal green (long/gain) */
-  --up-bg: rgba(43, 184, 163, 0.14);
-  --down: #f0616d;      /* red (short/loss) */
-  --down-bg: rgba(240, 97, 109, 0.14);
-  --warn: #f5b23d;
+  --text-0: #18201b;    /* primary text */
+  --text-1: #525b55;    /* secondary */
+  --text-2: #7f8781;    /* muted */
+
+  --accent: #1e4d3a;    /* deep forest green */
+  --accent-hover: #2a6650;
+  --accent-soft: rgba(30, 77, 58, 0.10);
+  --accent-grad: #1e4d3a; /* solid — no gradient */
+  --up: #1e7a50;        /* green (long/gain) */
+  --up-bg: rgba(30, 122, 80, 0.12);
+  --down: #c0533b;      /* brick red (short/loss) */
+  --down-bg: rgba(192, 83, 59, 0.12);
+  --warn: #a8691b;      /* amber, dark enough for a light background */
 
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
     Arial, sans-serif;
@@ -40,9 +40,9 @@
   --radius-pill: 999px;
 
   /* Soft, layered shadows for depth. */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25);
-  --shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 3px rgba(24, 32, 27, 0.06);
+  --shadow: 0 8px 30px rgba(24, 32, 27, 0.08);
+  --shadow-lg: 0 20px 60px rgba(24, 32, 27, 0.14);
 
   /* Spacing scale — used to keep breathing room consistent. */
   --sp-1: 4px;
@@ -88,7 +88,7 @@ button {
   height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--bg-3);
+  background: var(--border-strong);
   border-radius: 5px;
 }
 ::-webkit-scrollbar-track {
@@ -143,11 +143,11 @@ button {
   background: var(--accent-grad);
   border: none;
   color: #fff;
-  box-shadow: 0 6px 18px rgba(59, 123, 255, 0.28);
+  box-shadow: 0 6px 18px rgba(30, 77, 58, 0.18);
 }
 .btn-primary:hover {
   filter: brightness(1.06);
-  box-shadow: 0 8px 24px rgba(59, 123, 255, 0.38);
+  box-shadow: 0 8px 24px rgba(30, 77, 58, 0.24);
 }
 .btn-lg {
   padding: 13px 26px;
@@ -157,7 +157,7 @@ button {
 .btn-buy {
   background: var(--up);
   border-color: var(--up);
-  color: #04120f;
+  color: #ffffff;
   font-weight: 600;
 }
 .btn-buy:hover {
@@ -166,7 +166,7 @@ button {
 .btn-sell {
   background: var(--down);
   border-color: var(--down);
-  color: #1a0505;
+  color: #ffffff;
   font-weight: 600;
 }
 .btn-sell:hover {
@@ -211,16 +211,16 @@ select.input {
   text-transform: uppercase;
 }
 .badge-demo {
-  background: rgba(245, 178, 61, 0.16);
+  background: rgba(168, 105, 27, 0.10);
   color: var(--warn);
-  border: 1px solid rgba(245, 178, 61, 0.35);
+  border: 1px solid rgba(168, 105, 27, 0.35);
 }
 .badge-rt {
   background: var(--up-bg);
   color: var(--up);
 }
 .badge-delayed {
-  background: rgba(245, 178, 61, 0.14);
+  background: rgba(168, 105, 27, 0.10);
   color: var(--warn);
 }
 

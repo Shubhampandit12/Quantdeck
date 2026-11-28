@@ -37,7 +37,7 @@
 .bp-tabs button.active {
   color: #fff;
   background: var(--accent);
-  box-shadow: 0 2px 8px rgba(59, 123, 255, 0.26);
+  box-shadow: 0 2px 8px rgba(30, 77, 58, 0.18);
 }
 .bp-tabs .bp-count {
   color: inherit;

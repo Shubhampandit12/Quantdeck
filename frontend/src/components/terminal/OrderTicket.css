@@ -33,13 +33,13 @@
 .ticket-side button.buy.active {
   background: var(--up);
   border-color: var(--up);
-  color: #04120f;
+  color: #ffffff;
   box-shadow: 0 6px 18px var(--up-bg);
 }
 .ticket-side button.sell.active {
   background: var(--down);
   border-color: var(--down);
-  color: #1a0505;
+  color: #ffffff;
   box-shadow: 0 6px 18px var(--down-bg);
 }
 
