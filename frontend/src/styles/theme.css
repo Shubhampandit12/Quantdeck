@@ -29,8 +29,8 @@
 
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
     Arial, sans-serif;
-  /* Monospace is reserved for code editors and numeric/tabular data only —
-     never for prose like the AI reasoning trace. */
+  /* Monospace is reserved for code (strategy editor, logs, tool payloads).
+     Numbers use the UI font with tabular figures (see .num). */
   --font-mono: "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
 
   /* Rounded, generous corners everywhere — no sharp edges. */
@@ -95,7 +95,14 @@ button {
   background: transparent;
 }
 
-.mono {
+/* Prices, P&L, quantities: the normal UI font with equal-width digits, so
+   columns line up and live prices don't shift as they tick. */
+.num {
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+/* Code: strategy editor, strategy logs, AI tool payloads. */
+.code {
   font-family: var(--font-mono);
 }
 .up {

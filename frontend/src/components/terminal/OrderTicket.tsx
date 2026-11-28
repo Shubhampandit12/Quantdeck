@@ -93,11 +93,11 @@ export default function OrderTicket({ symbol }: Props) {
       <div className="ticket-info">
         <div className="ticket-info-row">
           <span>Buying power</span>
-          <span className="v mono">{fmtUsd(pf?.buying_power)}</span>
+          <span className="v num">{fmtUsd(pf?.buying_power)}</span>
         </div>
         <div className="ticket-info-row">
           <span>Margin used</span>
-          <span className="v mono">{fmtUsd(pf?.margin_used)}</span>
+          <span className="v num">{fmtUsd(pf?.margin_used)}</span>
         </div>
       </div>
 
@@ -122,29 +122,29 @@ export default function OrderTicket({ symbol }: Props) {
           </div>
           <div className="ticket-info-row">
             <span>Quantity</span>
-            <span className="v mono">{fmtNum(position.quantity, 4)}</span>
+            <span className="v num">{fmtNum(position.quantity, 4)}</span>
           </div>
           <div className="ticket-info-row">
             <span>Avg entry</span>
-            <span className="v mono">{fmtPrice(position.avg_entry_price)}</span>
+            <span className="v num">{fmtPrice(position.avg_entry_price)}</span>
           </div>
           <div className="ticket-info-row">
             <span>Last</span>
-            <span className="v mono">{fmtPrice(position.last_price)}</span>
+            <span className="v num">{fmtPrice(position.last_price)}</span>
           </div>
           <div className="ticket-info-row">
             <span>Market value</span>
-            <span className="v mono">{fmtUsd(position.market_value)}</span>
+            <span className="v num">{fmtUsd(position.market_value)}</span>
           </div>
           <div className="ticket-info-row">
             <span>Profit / loss</span>
-            <span className={`v mono ${signClass(position.unrealized_pnl)}`}>
+            <span className={`v num ${signClass(position.unrealized_pnl)}`}>
               {fmtSigned(position.unrealized_pnl)}
             </span>
           </div>
           <div className="ticket-info-row">
             <span>Liq. price</span>
-            <span className="v mono">
+            <span className="v num">
               {position.liquidation_price != null ? fmtPrice(position.liquidation_price) : "—"}
             </span>
           </div>

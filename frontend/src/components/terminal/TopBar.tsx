@@ -65,15 +65,15 @@ export default function TopBar({ timeframe, onTimeframe, connected }: Props) {
         title="Click to change your demo balance"
       >
         <span className="lbl">Cash ✎</span>
-        <span className="val mono">{fmtUsd(pf?.cash)}</span>
+        <span className="val num">{fmtUsd(pf?.cash)}</span>
       </div>
       <div className="topbar-stat">
         <span className="lbl">Equity</span>
-        <span className="val mono">{fmtUsd(pf?.equity)}</span>
+        <span className="val num">{fmtUsd(pf?.equity)}</span>
       </div>
       <div className="topbar-stat">
         <span className="lbl">uPnL</span>
-        <span className={`val mono ${signClass(pf?.unrealized_pnl)}`}>
+        <span className={`val num ${signClass(pf?.unrealized_pnl)}`}>
           {pf ? fmtSigned(pf.unrealized_pnl) : "—"}
         </span>
       </div>

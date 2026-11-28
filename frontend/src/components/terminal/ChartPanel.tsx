@@ -64,7 +64,11 @@ export default function ChartPanel({ symbol, interval }: Props) {
       layout: {
         background: { color: "transparent" },
         textColor: "#a3a6af",
-        fontFamily: "var(--font-sans)",
+        // The chart draws on a canvas, which can't read CSS variables, so pass
+        // the resolved UI font stack.
+        fontFamily:
+          getComputedStyle(document.documentElement).getPropertyValue("--font-sans").trim() ||
+          "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       },
       grid: {
         vertLines: { color: "#1c2230" },
@@ -192,7 +196,7 @@ export default function ChartPanel({ symbol, interval }: Props) {
     <div className="chartpanel">
       <div className="chart-head">
         <span className="sym">{symbol}</span>
-        <span className="last mono">{last ? fmtPrice(last.price) : "—"}</span>
+        <span className="last num">{last ? fmtPrice(last.price) : "—"}</span>
         {delayBadge}
       </div>
 

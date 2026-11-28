@@ -115,12 +115,12 @@ function PositionsTable({ positions }: { positions: Position[] }) {
           <tr key={p.symbol}>
             <td>{p.symbol}</td>
             <td className={`side-${p.side}`}>{p.side.toUpperCase()}</td>
-            <td className="mono">{fmtNum(p.quantity, 4)}</td>
-            <td className="mono">{fmtPrice(p.avg_entry_price)}</td>
-            <td className="mono">{fmtPrice(p.last_price)}</td>
-            <td className="mono">{fmtUsd(p.market_value)}</td>
-            <td className={`mono ${signClass(p.unrealized_pnl)}`}>{fmtSigned(p.unrealized_pnl)}</td>
-            <td className="mono">{p.liquidation_price != null ? fmtPrice(p.liquidation_price) : "—"}</td>
+            <td className="num">{fmtNum(p.quantity, 4)}</td>
+            <td className="num">{fmtPrice(p.avg_entry_price)}</td>
+            <td className="num">{fmtPrice(p.last_price)}</td>
+            <td className="num">{fmtUsd(p.market_value)}</td>
+            <td className={`num ${signClass(p.unrealized_pnl)}`}>{fmtSigned(p.unrealized_pnl)}</td>
+            <td className="num">{p.liquidation_price != null ? fmtPrice(p.liquidation_price) : "—"}</td>
             <td>
               <button
                 className="btn bp-row-btn"
@@ -183,10 +183,10 @@ function OrdersTable({ orders }: { orders: Order[] }) {
             <td>{o.symbol}</td>
             <td className={`side-${o.side}`}>{o.side.toUpperCase()}</td>
             <td>{o.type}</td>
-            <td className="mono">{fmtNum(o.quantity, 4)}</td>
-            <td className="mono">{fmtNum(o.filled_quantity, 4)}</td>
-            <td className="mono">{o.limit_price != null ? fmtPrice(o.limit_price) : "—"}</td>
-            <td className="mono">{o.stop_price != null ? fmtPrice(o.stop_price) : "—"}</td>
+            <td className="num">{fmtNum(o.quantity, 4)}</td>
+            <td className="num">{fmtNum(o.filled_quantity, 4)}</td>
+            <td className="num">{o.limit_price != null ? fmtPrice(o.limit_price) : "—"}</td>
+            <td className="num">{o.stop_price != null ? fmtPrice(o.stop_price) : "—"}</td>
             <td>{o.status}</td>
             <td>
               <button className="btn bp-row-btn" onClick={() => cancel(o)} disabled={cancelling === o.id}>

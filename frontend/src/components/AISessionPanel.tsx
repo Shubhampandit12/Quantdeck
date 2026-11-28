@@ -509,20 +509,20 @@ function TraceRow({ step }: { step: AITraceStep }) {
     <div className={`ai-trace-row ai-trace-${step.kind}`}>
       <div className="ai-trace-meta">
         <span className={`ai-trace-kind ai-kind-${step.kind}`}>{label}</span>
-        {ts && <span className="ai-trace-ts mono">{ts}</span>}
+        {ts && <span className="ai-trace-ts num">{ts}</span>}
       </div>
       <div className="ai-trace-content">
         {step.kind === "tool_call" ? (
           <>
-            <span className="ai-trace-tool mono">{step.tool ?? "tool"}</span>
+            <span className="ai-trace-tool code">{step.tool ?? "tool"}</span>
             {step.args !== undefined && (
-              <pre className="ai-trace-code mono">{stringify(step.args)}</pre>
+              <pre className="ai-trace-code code">{stringify(step.args)}</pre>
             )}
           </>
         ) : step.kind === "tool_result" ? (
           <>
-            {step.tool && <span className="ai-trace-tool mono">{step.tool}</span>}
-            <pre className="ai-trace-code mono">{stringify(step.result)}</pre>
+            {step.tool && <span className="ai-trace-tool code">{step.tool}</span>}
+            <pre className="ai-trace-code code">{stringify(step.result)}</pre>
           </>
         ) : (
           <span className="ai-trace-text">{step.text ?? stringify(step.result)}</span>

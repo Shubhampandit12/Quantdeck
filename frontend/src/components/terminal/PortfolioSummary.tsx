@@ -35,7 +35,7 @@ function Stat({ label, value, cls }: { label: string; value: string; cls?: strin
   return (
     <div className="pfstat">
       <span className="pfstat-lbl">{label}</span>
-      <span className={`pfstat-val mono ${cls ?? ""}`}>{value}</span>
+      <span className={`pfstat-val num ${cls ?? ""}`}>{value}</span>
     </div>
   );
 }

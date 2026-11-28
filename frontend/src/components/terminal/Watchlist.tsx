@@ -111,8 +111,8 @@ export default function Watchlist({ selected, onSelect }: Props) {
               title={s.name}
             >
               <span className="wl-sym">{s.symbol}</span>
-              <span className="wl-price mono">{q ? fmtPrice(q.price) : "—"}</span>
-              <span className={`wl-chg mono ${signClass(chg)}`}>{fmtPct(chg)}</span>
+              <span className="wl-price num">{q ? fmtPrice(q.price) : "—"}</span>
+              <span className={`wl-chg num ${signClass(chg)}`}>{fmtPct(chg)}</span>
             </div>
           );
         })}
