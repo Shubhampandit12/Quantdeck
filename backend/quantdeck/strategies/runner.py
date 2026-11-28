@@ -77,6 +77,12 @@ class _BarAggregator:
         self._sec = max(1, interval_seconds)
         self._current: dict[str, Bar] = {}
         self._bucket: dict[str, int] = {}
+        # Quotes report cumulative day volume; remember the last value so each
+        # bar gets only the volume traded during it.
+        self._last_cum_vol: dict[str, float] = {}
+        # The first bar per symbol starts mid-interval, so it is incomplete and
+        # is not emitted.
+        self._partial: set[str] = set()
 
     def _bucket_start(self, ts: datetime) -> int:
         epoch = int(ts.timestamp())
@@ -87,16 +93,22 @@ class _BarAggregator:
         ts = quote.timestamp or datetime.now(timezone.utc)
         bucket = self._bucket_start(ts)
         price = float(quote.price)
-        vol = float(quote.volume or 0.0)
+        cum = float(quote.volume or 0.0)
+        prev_cum = self._last_cum_vol.get(sym)
+        self._last_cum_vol[sym] = cum
+        vol = max(0.0, cum - prev_cum) if prev_cum is not None else 0.0
 
         closed: Optional[Bar] = None
         prev_bucket = self._bucket.get(sym)
         if prev_bucket is None:
-            # First quote for this symbol: open a fresh bar.
+            # First quote for this symbol: open a fresh (partial) bar.
             self._open(sym, bucket, price, vol)
+            self._partial.add(sym)
         elif bucket != prev_bucket:
             # Interval rolled over: close the previous bar, open the next.
-            closed = self._current.get(sym)
+            # The very first bar is incomplete, so it is dropped, not emitted.
+            closed = None if sym in self._partial else self._current.get(sym)
+            self._partial.discard(sym)
             self._open(sym, bucket, price, vol)
         else:
             # Same interval: extend the running bar.
@@ -249,6 +261,9 @@ class StrategyManager:
         symbols: Optional[list[str]] = None,
         interval: str = "1m",
     ) -> dict:
+        if not symbols or not any(str(s).strip() for s in symbols):
+            raise StrategyError("pick at least one symbol to run the strategy on")
+
         async with self._lock:
             if strategy_id in self._running:
                 # Already running: return current summary rather than double-start.
@@ -259,7 +274,7 @@ class StrategyManager:
             params = json.loads(row.params_json or "{}")
 
             run = _RunningStrategy(strategy_id, portfolio_id, interval)
-            run.symbols = [normalize_symbol(s) for s in (symbols or [])]
+            run.symbols = [normalize_symbol(s) for s in symbols if str(s).strip()]
             self._running[strategy_id] = run
 
         await self._set_status(strategy_id, StrategyStatus.STARTING)
@@ -286,11 +301,11 @@ class StrategyManager:
         except SandboxViolation as exc:
             await self._fail(run, f"sandbox violation: {exc}")
             row = await self._require(strategy_id)
-            return self._summary(row, status=StrategyStatus.ERROR)
+            return {**self._summary(row, status=StrategyStatus.ERROR), "error": run.error}
         except Exception as exc:  # noqa: BLE001
             await self._fail(run, f"failed to start: {exc}")
             row = await self._require(strategy_id)
-            return self._summary(row, status=StrategyStatus.ERROR)
+            return {**self._summary(row, status=StrategyStatus.ERROR), "error": run.error}
 
         # Kick off the market-data stream + bar aggregation.
         run.stream_task = asyncio.create_task(self._stream_loop(run))
@@ -549,9 +564,12 @@ class StrategyManager:
         if run is not None:
             return run.status
         try:
-            return StrategyStatus(row.status)
+            st = StrategyStatus(row.status)
         except ValueError:
             return StrategyStatus.IDLE
+        if st in (StrategyStatus.STARTING, StrategyStatus.RUNNING, StrategyStatus.STOPPING):
+            return StrategyStatus.STOPPED
+        return st
 
     def _summary(
         self, row: StrategyORM, status: Optional[StrategyStatus] = None

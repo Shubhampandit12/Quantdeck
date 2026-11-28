@@ -157,6 +157,7 @@ export interface StrategySummary {
   name: string;
   status: string;
   portfolio_id?: string | null;
+  error?: string | null; // why a start failed, when status is "error"
 }
 
 export interface AITraceStep {

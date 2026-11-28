@@ -27,6 +27,8 @@ const EXAMPLE_CODE = `# Strategy A — three-candle momentum
 #   * Candles are built live from streamed prices at the interval you pick next
 #     to the Start button (e.g. 1m). The strategy needs 3 finished candles
 #     before it can make its first decision.
+#   * When the US market is closed the price doesn't move, so every candle is
+#     flat and the strategy will (correctly) never trade.
 #   * Every order goes through the same risk checks as a manual order.
 
 from quantdeck.strategies import Strategy
@@ -51,6 +53,8 @@ class StrategyA(Strategy):
 
     def on_bar(self, ctx, bar):
         symbol = bar.symbol
+        colour = "green" if is_green(bar) else "red" if is_red(bar) else "flat"
+        ctx.log(f"{symbol} candle closed {bar.close:.2f} ({colour})")
         pos = ctx.get_position(symbol)
         side = pos.side.value if pos is not None else "flat"
 
@@ -112,7 +116,7 @@ export default function StrategyManager({ portfolioId }: { portfolioId: string }
 
   // Run controls
   const [symbolsInput, setSymbolsInput] = useState("AAPL");
-  const [interval, setIntervalStr] = useState("1h");
+  const [interval, setIntervalStr] = useState("1m");
 
   const logRef = useRef<HTMLDivElement>(null);
   const running = isRunning(status);
@@ -158,24 +162,22 @@ export default function StrategyManager({ portfolioId }: { portfolioId: string }
   }, []);
 
   // --- Save (create or update) ---------------------------------------------
+  // Persists the editor contents and returns the saved strategy.
+  const persist = useCallback(async (): Promise<StrategySummary> => {
+    const name = draft.name.trim() || "Untitled";
+    const saved =
+      draft.id === null
+        ? await api.createStrategy({ name, code: draft.code, portfolio_id: portfolioId })
+        : await api.updateStrategy(draft.id, { name, code: draft.code });
+    setDraft((d) => ({ ...d, id: saved.id, name: saved.name }));
+    return saved;
+  }, [draft, portfolioId]);
+
   const save = useCallback(async () => {
     setError(null);
     setBusy(true);
     try {
-      let saved: StrategySummary;
-      if (draft.id === null) {
-        saved = await api.createStrategy({
-          name: draft.name.trim() || "Untitled",
-          code: draft.code,
-          portfolio_id: portfolioId,
-        });
-      } else {
-        saved = await api.updateStrategy(draft.id, {
-          name: draft.name.trim() || "Untitled",
-          code: draft.code,
-        });
-      }
-      setDraft((d) => ({ ...d, id: saved.id, name: saved.name }));
+      const saved = await persist();
       setStatus(saved.status ?? status);
       await loadList();
     } catch (e) {
@@ -183,7 +185,7 @@ export default function StrategyManager({ portfolioId }: { portfolioId: string }
     } finally {
       setBusy(false);
     }
-  }, [draft, portfolioId, status, loadList]);
+  }, [persist, status, loadList]);
 
   // --- Delete ---------------------------------------------------------------
   const del = useCallback(async () => {
@@ -205,31 +207,31 @@ export default function StrategyManager({ portfolioId }: { portfolioId: string }
   }, [draft.id, newStrategy, loadList]);
 
   // --- Start / Stop ---------------------------------------------------------
+  // Always saves first, so the code that runs is exactly what's in the editor
+  // (unsaved edits used to be silently ignored, and a new draft couldn't start).
   const start = useCallback(async () => {
-    if (draft.id === null) {
-      setError("Save the strategy before starting it.");
-      return;
-    }
     setError(null);
     setBusy(true);
     try {
+      const saved = await persist();
       const symbols = symbolsInput
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean);
-      const s = await api.startStrategy(draft.id, {
+      const s = await api.startStrategy(saved.id, {
         portfolio_id: portfolioId,
         symbols: symbols.length ? symbols : undefined,
         interval: interval || undefined,
       });
       setStatus(s.status ?? "running");
+      if (s.error) setError(s.error);
       await loadList();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(false);
     }
-  }, [draft.id, symbolsInput, interval, portfolioId, loadList]);
+  }, [persist, symbolsInput, interval, portfolioId, loadList]);
 
   const stop = useCallback(async () => {
     if (draft.id === null) return;
@@ -271,10 +273,7 @@ export default function StrategyManager({ portfolioId }: { portfolioId: string }
   useEffect(() => {
     if (!portfolioId) return;
     const sock = openEventSocket(portfolioId, (e: MarketEvent) => {
-      if (e.type === "strategy_log") {
-        const line = typeof e.data.line === "string" ? e.data.line : String(e.data.message ?? "");
-        if (line) setLogs((prev) => [...prev.slice(-499), line]);
-      } else if (e.type === "strategy_status") {
+      if (e.type === "strategy_status") {
         const sid = typeof e.data.strategy_id === "string" ? e.data.strategy_id : null;
         const st = typeof e.data.status === "string" ? e.data.status : null;
         // Only reflect status for the strategy currently in the editor.
@@ -357,8 +356,8 @@ export default function StrategyManager({ portfolioId }: { portfolioId: string }
               <button
                 className="btn btn-buy"
                 onClick={() => void start()}
-                disabled={busy || draft.id === null}
-                title={draft.id === null ? "Save first" : "Start live"}
+                disabled={busy}
+                title="Save and start live"
               >
                 Start
               </button>
@@ -402,11 +401,11 @@ export default function StrategyManager({ portfolioId }: { portfolioId: string }
 
         {/* Code editor: line-number gutter + monospace textarea */}
         <div className="strat-editor">
-          <pre id="qd-strategy-gutter" className="strat-gutter mono" aria-hidden="true">
+          <pre id="qd-strategy-gutter" className="strat-gutter code" aria-hidden="true">
             {gutter}
           </pre>
           <textarea
-            className="strat-code mono"
+            className="strat-code code"
             spellCheck={false}
             value={draft.code}
             onChange={(e) => setDraft((d) => ({ ...d, code: e.target.value }))}
@@ -418,7 +417,7 @@ export default function StrategyManager({ portfolioId }: { portfolioId: string }
         {/* Logs pane */}
         <div className="strat-logs">
           <div className="panel-title">Logs {running && <span className="strat-live">live</span>}</div>
-          <div className="strat-logs-body mono" ref={logRef}>
+          <div className="strat-logs-body code" ref={logRef}>
             {logs.length === 0 ? (
               <div className="muted strat-logs-empty">No logs yet.</div>
             ) : (
